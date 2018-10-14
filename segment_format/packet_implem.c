@@ -82,6 +82,7 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
 	memcpy(dataNonTr, data, (2*sizeof(uint32_t)));
 	dataNonTr[0] = dataNonTr[0] & 0b11011111;
 	testCrc1 = crc32(testCrc1, (Bytef *)dataNonTr, (2*sizeof(uint32_t)));
+	free(dataNonTr);
 
 	if(testCrc1 != crc1){
 		return E_CRC;
@@ -286,4 +287,8 @@ pkt_status_code pkt_set_payload(pkt_t *pkt,
 
 
 	return PKT_OK;
+}
+
+void main (int argc, char ** argv){
+
 }
