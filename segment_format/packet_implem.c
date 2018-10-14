@@ -49,12 +49,12 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
 	}
 	// seqnum
 	uint8_t seqnum;
-	memcpy(&seqnum, data+sizeof(uint8_t),sizeof(uint8_t)); 
+	memcpy(&seqnum, data+1,sizeof(uint8_t)); 
 	pkt_set_seqnum(pkt, seqnum);
 
 	// length
 	uint16_t length;
-	memcpy(&length, data+sizeof(uint16_t),sizeof(uint16_t)); 
+	memcpy(&length, data+2,sizeof(uint16_t)); 
 	length = ntohs(length);
 	pkt_set_length(pkt, length);
 
@@ -67,42 +67,42 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
 	}
 	// timestamp
 	uint32_t timestamp;
-	memcpy(&timestamp, data+sizeof(uint32_t),sizeof(uint32_t)); 
+	memcpy(&timestamp, data+4,sizeof(uint32_t)); 
 	pkt_set_timestamp(pkt, timestamp);
 	
 	// crc1
 	uint32_t crc1;
-	memcpy(&crc1, data+2*sizeof(uint32_t), sizeof(uint32_t));
-	crc1 = ntohl(crc1);
+	memcpy(&crc1, data+8, sizeof(uint32_t));
+	//crc1 = ntohl(crc1);
 	pkt_set_crc1(pkt, crc1);
 
 	// verif crc1
 	uint32_t testCrc1 = 0;
 	char *dataNonTr = (char *)malloc(2*sizeof(uint32_t));
 	memcpy(dataNonTr, data, (2*sizeof(uint32_t)));
-	dataNonTr[0] = dataNonTr[0] & 0b11011111;
+	dataNonTr[0] = dataNonTr[0] & 0b11111011;
 	testCrc1 = crc32(testCrc1, (Bytef *)dataNonTr, (2*sizeof(uint32_t)));
-	free(dataNonTr);
+    free(dataNonTr);
 
-	if(testCrc1 != crc1){
+	if(testCrc1 != ntohl(crc1)){
 		return E_CRC;
 	}
 	// payload
-	pkt_set_payload(pkt, data+3*sizeof(uint32_t), length);
+	pkt_set_payload(pkt, data+12, length);
 
 
 	if(length == len-4*sizeof(uint32_t)){
 		// crc2
 		uint32_t crc2;
 		memcpy(&crc2, &(data[length-4]), sizeof(uint32_t));
-		crc2 = ntohl(crc2);
+		//crc2 = ntohl(crc2);
 		pkt_set_crc2(pkt, crc2);
 		
 		// verif crc2
 		uint32_t testCrc2 = 0;
-		testCrc2 = crc32(testCrc2, (Bytef *)(data +(3*sizeof(uint32_t))), length);
+		testCrc2 = crc32(testCrc2, (Bytef *)(data +12), length);
 
-		if(testCrc2 != crc2){
+		if(testCrc2 != ntohl(crc2)){
 			return E_CRC;
 		}
 	}
@@ -122,34 +122,41 @@ pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
 	}
 	// window, tr et type 
 	memcpy(buf, pkt, sizeof(uint8_t));
-	
+	*len = sizeof(uint8_t);
 	// seqnum
-	uint8_t seqnum = htons(	pkt_get_seqnum(pkt));
-	memcpy(buf+sizeof(uint8_t), &seqnum,sizeof(uint8_t)); 
-	
+	uint8_t seqnum = pkt_get_seqnum(pkt);
+	memcpy(buf+1, &seqnum,sizeof(uint8_t)); 
+	*len += sizeof(uint8_t);
 	// length
 	uint16_t length = pkt_get_length(pkt);
 	uint16_t nlength = htons(length);
-	memcpy(buf+sizeof(uint16_t), &nlength,sizeof(uint16_t)); 
-	
+	memcpy(buf+2, &nlength,sizeof(uint16_t)); 
+	*len += sizeof(uint16_t);
 	// timestamp
-	uint32_t timestamp = htonl(pkt_get_timestamp(pkt));
-	memcpy(buf+sizeof(uint32_t), &timestamp,sizeof(uint32_t)); 
+	uint32_t timestamp = pkt_get_timestamp(pkt);
+	memcpy(buf+4, &timestamp,sizeof(uint32_t)); 
+	*len += sizeof(uint32_t);
 
 	// crc1
-	uint32_t crc1 = htonl(pkt_get_crc1(pkt));
-	memcpy(buf+2*sizeof(uint32_t), &crc1,sizeof(uint32_t)); 
-	
+	uint32_t crc1 = pkt_get_crc1(pkt);
+	memcpy(buf+8, &crc1,sizeof(uint32_t)); 
+	*len += sizeof(uint32_t);
+
 	// payload
-	memcpy(buf+3*sizeof(uint32_t), pkt_get_payload(pkt), length);
+	memcpy(buf+12, pkt_get_payload(pkt), length);
+	*len += length;
 
 
 	// crc2
-	uint32_t crc2 = htonl(pkt_get_crc2(pkt));
+	uint32_t crc2 = pkt_get_crc2(pkt);
 	if(crc2!=0){
 
-		memcpy(buf+3*sizeof(uint32_t)+length, &crc2, sizeof(uint32_t));
+		memcpy(buf+12+length, &crc2, sizeof(uint32_t));
+        *len += sizeof(uint32_t);
+
 	}
+    
+     
 	return PKT_OK;
 	
 	
@@ -275,7 +282,10 @@ pkt_status_code pkt_set_payload(pkt_t *pkt,
 	    pkt->payload = NULL;
 	    pkt->length = 0;
 	}
-       
+    
+    if((data==NULL)||(length == 0)){
+        return PKT_OK;
+    }
 
 	pkt->payload = (char *)malloc((length)*sizeof(char));
 
@@ -287,8 +297,4 @@ pkt_status_code pkt_set_payload(pkt_t *pkt,
 
 
 	return PKT_OK;
-}
-
-void main (int argc, char ** argv){
-
 }
