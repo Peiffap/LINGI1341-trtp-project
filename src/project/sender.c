@@ -8,6 +8,7 @@
 #include <time.h>
 #include "utilities.h"
 #include <fcntl.h>
+#include <errno.h>
 
 #define MAX_PAYLOAD_LENGTH 512
 #define MAX_SEQNUM 256
@@ -125,6 +126,8 @@ int add_pkt_to_queue( char* buf, int len){
 
 int disconnect(int sfd){
 
+	return 0;
+
 	int timestamp = 0; // How do we use the timestamp ??
 	pkt_t * newpkt = pkt_create(window, lastackseqnum, 0, timestamp, NULL);
 	char bufpkt[3*sizeof(uint32_t)];
@@ -134,7 +137,7 @@ int disconnect(int sfd){
 		perror("error encoding pkt in add_pkt_to_queue");
 		return -1;
 	}
-	pkt_del(newpkt);
+	//pkt_del(newpkt);
 
 	int errw = write(sfd, bufpkt, totlen);
 	if(errw <0){
@@ -172,15 +175,15 @@ int disconnect(int sfd){
 
 		if (FD_ISSET(sfd, &readfds)) {
 			err = read(sfd, buf2,  sizeof(pkt_t));
-
+			printf("%d %d\n",err, errno);
 			if (err <= 0){
-				perror("error reading from socket : ");
+				perror("error reading from socket in disconnection: ");
 				return -1;
 			}
 			pkt_t *ack = pkt_new();
 			err = pkt_decode(buf2, err, ack);
 			if(err != PKT_OK){
-				perror("error decoding ack");
+				perror("error decoding ack in disconnection");
 				pkt_del(ack);
 				return -1;
 			}

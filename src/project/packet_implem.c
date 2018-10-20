@@ -105,12 +105,10 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
 pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
 {
 
-	if((pkt_get_crc2(pkt) == 0)&&(*len<pkt_get_length(pkt)+3*sizeof(uint32_t))){
+	if(*len<pkt_get_length(pkt)+3*sizeof(uint32_t)){
 		return E_NOMEM;
 	}
-	else if((pkt_get_crc2(pkt)!=0)&&(*len<pkt_get_length(pkt)+4*sizeof(uint32_t))){
-		return E_NOMEM;
-	}
+	
 	// window, tr et type 
 	memcpy(buf, pkt, sizeof(uint8_t));
 	*len = sizeof(uint8_t);
@@ -319,5 +317,5 @@ pkt_t* pkt_create(const uint8_t window, const uint8_t seqnum, const uint16_t len
 	pkt_set_length(newpkt, len);
 	pkt_set_timestamp(newpkt, timestamp);
 	pkt_set_payload(newpkt, payload, len);
-	return PKT_OK;
+	return newpkt;
 }
