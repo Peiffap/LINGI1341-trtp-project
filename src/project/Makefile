@@ -16,9 +16,9 @@ CC      = cc
 LDFLAGS= -rdynamic -lz
 
 # Default target
-all: clean receiver sender
+all: clean receiver senderma
 
-COMMON = tools.c send_receive.c
+COMMON = tools.c send_receive.c packet_implem.c
 
 # Receiver
 receiver:
@@ -26,7 +26,7 @@ receiver:
 
 # Sender
 sender:
-	${CC} ${CFLAGS} sender.c ${COMMON} {LDFLAGS}
+	${CC} ${CFLAGS} sender.c ${COMMON} ${LDFLAGS}
 
 # If we run `make debug` instead, keep the debug symbols for gdb
 # and define the DEBUG macro.
