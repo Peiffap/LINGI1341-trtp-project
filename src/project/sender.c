@@ -13,8 +13,9 @@
 #define MAX_SEQNUM 256
 #define TIMEOUT 999
 
+
 uint8_t lastseqnum = 0;
-uint8_t window = 1;
+uint8_t window = (uint8_t)(511);
 uint8_t firstseqnumwindow = 0;
 struct dataqueue {
 	char *bufpkt;
@@ -26,6 +27,37 @@ struct dataqueue {
 struct dataqueue *startofqueue = NULL;
 struct dataqueue *firsttosend = NULL;
 struct dataqueue *lasttosend = NULL;
+
+int remove_pkt(uint8_t seqnum){
+	struct dataqueue *current = startofqueue;
+	if(current->seqnum == seqnum){
+		startofqueue = current->next;
+		return 0;
+	}
+	else{
+		current = current->next;
+		struct dataqueue *before = startofqueue;
+
+		int search = 1;
+		while((search)&&(current!=NULL)){
+			if(current->seqnum == seqnum){
+
+				before->next = current->next;
+				search = 0;
+				return 0;
+
+			}
+
+			else{
+				before = before->next;
+				current = current->next;
+			}
+
+		}
+	}
+
+	return -1;
+}
 
 void send_pkt(const int sfd){
 
@@ -121,7 +153,7 @@ int send_data(const int sfd, const int fd){
 
 		if(pkt_waiting >0){
 			send_pkt(sfd);
-			//pkt_waiting--;
+			
 		}
 
 		if (FD_ISSET(sfd, &readfds)) { // Data incoming from socket
@@ -137,11 +169,31 @@ int send_data(const int sfd, const int fd){
 				perror("error decoding ack");
 				return -1;
 			}
+			int seqnum = pkt_get_seqnum(ack);
+
 			if(pkt_get_type(ack) == PTYPE_ACK){
-				firstseqnumwindow = pkt_get_seqnum(ack);			
+
+				firstseqnumwindow = (pkt_get_seqnum(ack)+1)%MAX_SEQNUM;	
+				int remerr = remove_pkt(seqnum);
+				if(remerr == 0){
+					pkt_waiting--;
+
+				}
+				int paylen = pkt_get_length(ack);
+				const char *payload = pkt_get_payload(ack);
+
+				for(int i = 0; i<paylen; i++){
+					remerr = remove_pkt(payload[i]);
+					if(remerr == 0){
+						pkt_waiting--;
+
+					}
+				}
+				
+
+				
 			}
 			if(pkt_get_type(ack) == PTYPE_NACK){
-				int seqnum = pkt_get_seqnum(ack);
 				struct dataqueue *current = startofqueue;
 				int search = 1;
 				while(search){
