@@ -140,6 +140,31 @@ int send_data(const int sfd, const int fd){
 			if(pkt_get_type(ack) == PTYPE_ACK){
 				firstseqnumwindow = pkt_get_seqnum(ack);			
 			}
+			if(pkt_get_type(ack) == PTYPE_NACK){
+				int seqnum = pkt_get_seqnum(ack);
+				struct dataqueue *current = startofqueue;
+				int search = 1;
+				while(search){
+					if(current->seqnum == seqnum){
+						search = 0;
+					}
+					else{
+						current = current->next;
+					}
+				}
+				int errw = write(sfd, current->bufpkt, current->len);
+				if(errw <0){
+					perror("error writing pkt in resending pkt");
+					return -1;
+				}
+
+				errw = clock_gettime(CLOCK_MONOTONIC,&(current->time));
+				
+				if(errw!=0){
+					perror("error clock in resending data");
+					return -1;
+				}
+			}
 			
 		}
 		
