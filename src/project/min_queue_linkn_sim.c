@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "min_queue.h"
+#include "min_queue_link_sim.h"
 
 #include <stdlib.h> /* malloc */
 #include <string.h> /* memcpy */
