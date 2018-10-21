@@ -33,9 +33,9 @@ void send_acknowledgment(int sfd, pkt_t *packet, uint8_t wdw, uint8_t type) {
 	uint16_t ts = pkt_get_timestamp(packet);
 	char *buf;
 	if (type == PTYPE_ACK) {
-		buf = pkt_create(type, wdw, succ(seqnum), ts);
+		buf = pkt_create2(type, wdw, succ(seqnum), ts);
 	} else {
-		buf = pkt_create(type, wdw, seqnum, ts);
+		buf = pkt_create2(type, wdw, seqnum, ts);
 	}
 	if (write(sfd, buf, 12) < 0) {
 		printf("[ERROR] [RECEIVER] Error while sending (N)ACK\n");
@@ -60,12 +60,38 @@ static void receive_data(FILE *f, int sfd) {
 	int last_seqnum = -1;
 	uint8_t window_size = 31;
 	minqueue_t *pkt_queue = minq_new(cmp, equal);
-	while (cont) {
+
+	pkt_t *test = pkt_new();
+	pkt_set_type(test, PTYPE_DATA);
+	pkt_set_tr(test, 0);
+	pkt_set_window(test, 0b00011111);
+	pkt_set_seqnum(test, 0b00000000);
+	pkt_set_length(test, 7);
+	pkt_set_timestamp(test, 0b00011111000111110001111100011111);
+	pkt_set_crc1(test, 0b00011111000111110001111100011111);
+	pkt_set_payload(test, "werner", 7);
+	pkt_set_crc2(test, 0b00011111000111110001111100011111);
+
+	printf("Packet defined\n");
+
+	int i = 0;
+
+	while (cont && i == 0) {
+		i++;
+		/*
 		ssize_t bytes_read = recv(sfd, buffer, 528, 0);
 		if (bytes_read == -1) {
 			printf("[ERROR] [RECEIVER] Invalid read from socket\n");
 			continue;
 		}
+		*/
+
+		size_t len;
+		pkt_status_code pkt_stat = pkt_encode2(test, buffer, &len);
+		printf("%d", pkt_stat);
+		size_t bytes_read = 23;
+
+		printf("this is the buffer : %s\n", buffer);
 
 		pkt_t *packet = pkt_new();
 		pkt_status_code pkt_status = pkt_decode(buffer, bytes_read, packet);
@@ -174,11 +200,13 @@ int main(int argc, char *argv[]) {
 	// bind to socket
 	int sfd = create_socket(&addr, port, NULL, -1);
 	printf("Connected to socket %d\n", sfd);
+	/*
 	if (sfd > 0 && wait_for_client(sfd) < 0) {
 		printf("[ERROR] [RECEIVER] Could not connect to socket\n");
 		close(sfd);
 		return EXIT_FAILURE;
 	}
+	*/
 
 	// listen in on the appropriate channel
 	if (file_specified) {
