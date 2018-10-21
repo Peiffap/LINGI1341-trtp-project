@@ -233,9 +233,7 @@ pkt_status_code pkt_set_window(pkt_t *pkt, const uint8_t window)
 
 pkt_status_code pkt_set_seqnum(pkt_t *pkt, const uint8_t seqnum)
 {
-	/*if 	{
-		return E_SEQNUM;
-	} Quand a-t-on un probleme ? */
+	
 	pkt->seqnum = seqnum;
 	return PKT_OK;
 }
@@ -337,4 +335,20 @@ char *pkt_create(const uint8_t type, const uint8_t window, const uint8_t seqnum,
 	uint32_t crc1 = htonl(testCrc1);
 	memcpy(buf+8, &crc1,sizeof(uint32_t));
 	return buf;
+}
+
+pkt_t* pkt_create_sender(const uint8_t window, const uint8_t seqnum, const uint16_t len, const uint32_t timestamp, const char *payload){
+	pkt_t* newpkt = pkt_new();
+	if(newpkt==NULL){
+		perror("error new pkt");
+		return NULL;	
+	}
+	pkt_set_type(newpkt, PTYPE_DATA);
+	pkt_set_tr(newpkt, 0);
+	pkt_set_window(newpkt, window);
+	pkt_set_seqnum(newpkt, seqnum);
+	pkt_set_length(newpkt, len);
+	pkt_set_timestamp(newpkt, timestamp);
+	pkt_set_payload(newpkt, payload, len);
+	return newpkt;
 }
