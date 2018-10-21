@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @@ Using random seed: 1540132142
 @@ Using parameters:
 .. port: 1341
@@ -38633,3 +38634,6 @@
 [SEQ   0] Sent packet (Forward).
 [SEQ   0] Delayed packet by 50 ms
 [SEQ   0] Sent packet (Forward).
+=======
+bash: ./link_sim: No such file or directory
+>>>>>>> parent of 3d67502... test.sh
