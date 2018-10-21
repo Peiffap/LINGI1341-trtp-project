@@ -4,7 +4,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "packet_interface.h"
 #include <time.h>
 #include "utilities.h"
 #include <fcntl.h>
@@ -30,9 +29,9 @@ struct dataqueue *firsttosend = NULL;
 struct dataqueue *lasttosend = NULL;
 uint8_t lastackseqnum = 0;
 
-int remove_pkt(uint8_t seqnum, int operation){
+int remove_pkt(uint8_t seqnum){
 	struct dataqueue *current = startofqueue;
-	if(((operation == 0)&&(current->seqnum == seqnum))||((operation == -1)&&(current->seqnum <= seqnum))){
+	if(current->seqnum <= seqnum){
 		startofqueue = current->next;
 		free(current);
 		return 0;
@@ -41,7 +40,7 @@ int remove_pkt(uint8_t seqnum, int operation){
 		current = current->next;
 		struct dataqueue *before = startofqueue;
 		while(current!=NULL){
-			if(((operation == 0)&&(current->seqnum == seqnum))||((operation == -1)&&(current->seqnum <= seqnum))){
+			if(current->seqnum <= seqnum){
 
 				before->next = current->next;
 				free(current);
@@ -92,7 +91,7 @@ int send_pkt(const int sfd){
 
 int add_pkt_to_queue( char* buf, int len){
 	int timestamp = 0; // How do we use the timestamp ??
-	pkt_t * newpkt = pkt_create(window, lastseqnum, len, timestamp, buf);
+	pkt_t * newpkt = pkt_create_sender(window, lastseqnum, len, timestamp, buf);
 	char bufpkt[len+4*sizeof(uint32_t)];
 	size_t totlen = len+4*sizeof(uint32_t);
 	pkt_status_code ret = pkt_encode(newpkt, bufpkt, &totlen);
@@ -128,7 +127,7 @@ int disconnect(int sfd){
 
 
 	int timestamp = 0; // How do we use the timestamp ??
-	pkt_t * newpkt = pkt_create(window, lastackseqnum, 0, timestamp, NULL);
+	pkt_t * newpkt = pkt_create_sender(window, lastackseqnum, 0, timestamp, NULL);
 	char bufpkt[3*sizeof(uint32_t)];
 	size_t totlen = 3*sizeof(uint32_t);
 	pkt_status_code ret = pkt_encode(newpkt, bufpkt, &totlen);
@@ -299,27 +298,12 @@ int send_data(const int sfd, const int fd){
 			if(pkt_get_type(ack) == PTYPE_ACK){
 
 				firstseqnumwindow = (pkt_get_seqnum(ack)+1)%MAX_SEQNUM;	
-				int remerr = remove_pkt(seqnum, 0);
+				int remerr = remove_pkt(seqnum);
 				if(remerr == 0){
 					pkt_waiting--;
 
 				}
-				remerr = remove_pkt(seqnum, -1);
-				if(remerr == 0){
-					pkt_waiting--;
-
-				}
-				int paylen = pkt_get_length(ack);
-				const char *payload = pkt_get_payload(ack);
-
-				for(int i = 0; i<paylen; i++){
-					remerr = remove_pkt(payload[i], 0);
-					if(remerr == 0){
-						pkt_waiting--;
-
-					}
-				}
-				
+			
 
 				
 			}

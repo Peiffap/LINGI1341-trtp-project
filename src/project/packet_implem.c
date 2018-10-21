@@ -1,4 +1,4 @@
-#include "packet_interface.h"
+#include "utilities.h"
 #include <zlib.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -243,9 +243,6 @@ pkt_status_code pkt_set_window(pkt_t *pkt, const uint8_t window)
 
 pkt_status_code pkt_set_seqnum(pkt_t *pkt, const uint8_t seqnum)
 {
-	/*if 	{
-		return E_SEQNUM;
-	} Quand a-t-on un probleme ? */
 	pkt->seqnum = seqnum;
 	return PKT_OK;
 }
@@ -304,7 +301,7 @@ pkt_status_code pkt_set_payload(pkt_t *pkt,
 	return PKT_OK;
 }
 
-pkt_t* pkt_create(const uint8_t window, const uint8_t seqnum, const uint16_t len, const uint32_t timestamp, const char *payload){
+pkt_t* pkt_create_sender(const uint8_t window, const uint8_t seqnum, const uint16_t len, const uint32_t timestamp, const char *payload){
 	pkt_t* newpkt = pkt_new();
 	if(newpkt==NULL){
 		perror("error new pkt");

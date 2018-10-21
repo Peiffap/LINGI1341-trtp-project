@@ -163,4 +163,5 @@ pkt_status_code pkt_set_crc2(pkt_t*, const uint32_t crc2);
 
 char *pkt_create(const uint8_t type, const uint8_t window, const uint8_t seqnum, const uint32_t timestamp);
 
+pkt_t* pkt_create_sender(const uint8_t window, const uint8_t seqnum, const uint16_t len, const uint32_t timestamp, const char *payload);
 #endif  /* __UTILITIES_H */
