@@ -1,14 +1,18 @@
 /*  vi:ts=4:sw=4:noet
 The MIT License (MIT)
+
 Copyright (c) 2015 Olivier Tilmans, olivier.tilmans@uclouvain.be
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
+
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -46,14 +50,13 @@ SOFTWARE.
 
 /* The data structure we'll be using to represent the priority queue */
 struct minqueue {
-	minq_key_cmp cmp; /* First compare function for the elements */
-	minq_key_cmp equal; /* Second compare function for the elements */
+	minq_key_cmp cmp; /* Compare function for the elements */
 	size_t size; /* The number of items in the queue */
 	size_t alloc; /* The number of allocated slots */
 	void **e; /* The array of slots in the queue */
 };
 
-minqueue_t *minq_new(minq_key_cmp cmp, minq_key_cmp equal)
+minqueue_t *minq_new(minq_key_cmp cmp)
 {
 	minqueue_t *q;
 	if (!cmp || !(q = malloc(sizeof(*q))))
@@ -64,7 +67,6 @@ minqueue_t *minq_new(minq_key_cmp cmp, minq_key_cmp equal)
 		return NULL;
 	}
 	q->cmp = cmp;
-	q->equal = equal;
 	q->size = 0;
 	q->alloc = SLOTS_PER_MALLOC;
 	return q;
@@ -80,13 +82,6 @@ void minq_del(minqueue_t *q)
 int minq_push(minqueue_t* q, void *v)
 {
 	if (!q) return -1;
-
-	for (size_t i = 0; i < minq_size(q); ++i) {
-		if (q->equal(q->e[i], v) == true) {
-			return 0;
-		}
-	}
-
 	/* Check if we have enough mem. slots */
 	if (q->size == q->alloc) {
 		/* We filled all slots, increase by an alloc step */

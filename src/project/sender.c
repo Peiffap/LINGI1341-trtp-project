@@ -125,7 +125,7 @@ int add_pkt_to_queue( char* buf, int len){
 
 int disconnect(int sfd){
 
-
+	return 0;
 	int timestamp = 0; // How do we use the timestamp ??
 	pkt_t * newpkt = pkt_create_sender(window, lastackseqnum, 0, timestamp, NULL);
 
