@@ -21,9 +21,11 @@ all: clean sender
 COMMON = tools.c send_receive.c pkt.c min_queue.c
 
 # Receiver
-receiver:
-	${CC} ${CFLAGS} receiver.c ${COMMON} ${LDFLAGS}
+receiver: receiver.o
+	${CC} ${CFLAGS} -o receiver receiver.o ${COMMON} ${LDFLAGS}
 
+receiver.o : receiver.c
+	${CC} ${CFLAGS} -c receiver.c ${COMMON} ${LDFLAGS}
 # Sender
 sender:	sender.o
 	${CC} ${CFLAGS} -o sender sender.o ${COMMON} ${LDFLAGS}

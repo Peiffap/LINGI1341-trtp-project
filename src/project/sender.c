@@ -128,6 +128,7 @@ int disconnect(int sfd){
 
 	int timestamp = 0; // How do we use the timestamp ??
 	pkt_t * newpkt = pkt_create_sender(window, lastackseqnum, 0, timestamp, NULL);
+
 	char bufpkt[3*sizeof(uint32_t)];
 	size_t totlen = 3*sizeof(uint32_t);
 	pkt_status_code ret = pkt_encode(newpkt, bufpkt, &totlen);
@@ -135,7 +136,8 @@ int disconnect(int sfd){
 		perror("error encoding pkt in disconnect");
 		return -1;
 	}
-	//pkt_del(newpkt);
+		printf("%p \n", bufpkt);
+	pkt_del(newpkt);
 
 	int errw = write(sfd, bufpkt, totlen);
 	if(errw <0){
@@ -160,19 +162,19 @@ int disconnect(int sfd){
 	tv.tv_sec= 0;
 	tv.tv_usec = 100;
 
-	char buf2[sizeof(pkt_t)+MAX_PAYLOAD_LENGTH];
+	char buf2[3*sizeof(uint32_t)];
 
 	int end = 0;
 	int err;
 	while (!end) {
-		memset((void *) buf2, 0, sizeof(pkt_t)+MAX_PAYLOAD_LENGTH);
+		memset((void *) buf2, 0, 3*sizeof(uint32_t));
 		FD_ZERO(&readfds);
 		FD_SET(sfd, &readfds);
 
 		select(sfd + 1, &readfds, NULL, NULL, &tv);
 
 		if (FD_ISSET(sfd, &readfds)) {
-			err = read(sfd, buf2,  sizeof(pkt_t)+MAX_PAYLOAD_LENGTH);
+			err = read(sfd, buf2, 3*sizeof(uint32_t));
 			printf("%d %d\n",err, errno);
 			if (err <= 0){
 				perror("error reading from socket in disconnection: ");
