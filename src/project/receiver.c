@@ -33,9 +33,9 @@ void send_acknowledgment(int sfd, pkt_t *packet, uint8_t wdw, uint8_t type) {
 	uint16_t ts = pkt_get_timestamp(packet);
 	char *buf;
 	if (type == PTYPE_ACK) {
-		buf = pkt_create2(type, wdw, succ(seqnum), ts);
+		buf = pkt_create(type, wdw, succ(seqnum), ts);
 	} else {
-		buf = pkt_create2(type, wdw, seqnum, ts);
+		buf = pkt_create(type, wdw, seqnum, ts);
 	}
 	if (write(sfd, buf, 12) < 0) {
 		printf("[ERROR] [RECEIVER] Error while sending (N)ACK\n");
@@ -87,7 +87,7 @@ static void receive_data(FILE *f, int sfd) {
 		*/
 
 		size_t len;
-		pkt_status_code pkt_stat = pkt_encode2(test, buffer, &len);
+		pkt_status_code pkt_stat = pkt_encode(test, buffer, &len);
 		printf("%d", pkt_stat);
 		size_t bytes_read = 23;
 

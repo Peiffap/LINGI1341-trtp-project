@@ -90,7 +90,7 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
 
 }
 
-pkt_status_code pkt_encode2(const pkt_t* pkt, char *buf, size_t *len)
+pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
 {
 	printf("enter encode\n");
 	if((pkt_get_crc2(pkt) == 0)&&(*len<pkt_get_length(pkt)+3*sizeof(uint32_t))){
@@ -236,7 +236,7 @@ pkt_status_code pkt_set_window(pkt_t *pkt, const uint8_t window)
 
 pkt_status_code pkt_set_seqnum(pkt_t *pkt, const uint8_t seqnum)
 {
-	
+
 	pkt->seqnum = seqnum;
 	return PKT_OK;
 }
@@ -344,7 +344,7 @@ pkt_t* pkt_create_sender(const uint8_t window, const uint8_t seqnum, const uint1
 	pkt_t* newpkt = pkt_new();
 	if(newpkt==NULL){
 		perror("error new pkt");
-		return NULL;	
+		return NULL;
 	}
 	pkt_set_type(newpkt, PTYPE_DATA);
 	pkt_set_tr(newpkt, 0);

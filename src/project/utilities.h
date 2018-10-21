@@ -115,7 +115,7 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt);
  * @return: Un code indiquant si l'operation a reussi ou E_NOMEM si
  *         le buffer est trop petit.
  */
-pkt_status_code pkt_encode2(const pkt_t*, char *buf, size_t *len);
+pkt_status_code pkt_encode(const pkt_t*, char *buf, size_t *len);
 
 /* Accesseurs pour les champs toujours presents du paquet.
  * Les valeurs renvoyees sont toutes dans l'endianness native
@@ -161,7 +161,7 @@ pkt_status_code pkt_set_payload(pkt_t*,
  */
 pkt_status_code pkt_set_crc2(pkt_t*, const uint32_t crc2);
 
-char *pkt_create2(const uint8_t type, const uint8_t window, const uint8_t seqnum, const uint32_t timestamp);
+char *pkt_create(const uint8_t type, const uint8_t window, const uint8_t seqnum, const uint32_t timestamp);
 
 pkt_t* pkt_create_sender(const uint8_t window, const uint8_t seqnum, const uint16_t len, const uint32_t timestamp, const char *payload);
 #endif  /* __UTILITIES_H */
