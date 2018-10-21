@@ -78,18 +78,18 @@ static void receive_data(FILE *f, int sfd) {
 
 	while (cont && i == 0) {
 		i++;
-		/*
+		
 		ssize_t bytes_read = recv(sfd, buffer, 528, 0);
 		if (bytes_read == -1) {
 			printf("[ERROR] [RECEIVER] Invalid read from socket\n");
 			continue;
 		}
-		*/
+		/*
 
 		size_t len;
 		pkt_status_code pkt_stat = pkt_encode(test, buffer, &len);
 		printf("%d", pkt_stat);
-		size_t bytes_read = 23;
+		size_t bytes_read = 23;*/
 
 		printf("this is the buffer : %s\n", buffer);
 
