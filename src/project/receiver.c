@@ -56,7 +56,7 @@ int write_data(FILE *f, pkt_t *packet) {
 
 static void receive_data(FILE *f, int sfd) {
 	bool cont = true;  // we want to keep receiving stuff
-	char buffer[528];
+	char buffer[512+4*sizeof(uint32_t)];
 	int last_seqnum = -1;
 	uint8_t window_size = 31;
 	minqueue_t *pkt_queue = minq_new(cmp, equal);
@@ -78,20 +78,20 @@ static void receive_data(FILE *f, int sfd) {
 
 	while (cont && i == 0) {
 		i++;
-		/*
-		ssize_t bytes_read = recv(sfd, buffer, 528, 0);
+		
+		ssize_t bytes_read = recv(sfd, buffer, 512+4*sizeof(uint32_t), 0);
 		if (bytes_read == -1) {
 			printf("[ERROR] [RECEIVER] Invalid read from socket\n");
 			continue;
 		}
-		*/
+		/*
 
 		size_t len;
 		pkt_status_code pkt_stat = pkt_encode(test, buffer, &len);
 		printf("%d", pkt_stat);
-		size_t bytes_read = 23;
+		size_t bytes_read = 23;*/
 
-		printf("this is the buffer : %s\n", buffer);
+		printf("this is the buffer : %d\n", buffer[0]);
 
 		pkt_t *packet = pkt_new();
 		pkt_status_code pkt_status = pkt_decode(buffer, bytes_read, packet);
@@ -126,7 +126,13 @@ static void receive_data(FILE *f, int sfd) {
 				send_acknowledgment(sfd, packet, window_size, PTYPE_NACK);
 				printf("[LOG] [RECEIVER] Packet %d truncated", pkt_get_seqnum(packet));
 			} else {
-				printf("[LOG] [RECEIVER] Packet status not OK");
+						printf("after %ld\n", bytes_read);
+
+				for(int j = 0; j<528; j++){
+					printf("%x", buffer[j]);
+				}
+													printf("after\n");
+				printf("[LOG] [RECEIVER] Packet status not OK, %d \n", pkt_status==E_CRC);
 			}
 			pkt_del(packet);
 		}
