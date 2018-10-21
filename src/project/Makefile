@@ -18,7 +18,7 @@ LDFLAGS= -rdynamic -lz
 # Default target
 all: clean sender
 
-COMMON = tools.c send_receive.c packet_implem.c min_queue.c
+COMMON = tools.c send_receive.c pkt.c min_queue.c
 
 # Receiver
 receiver:
@@ -33,7 +33,7 @@ sender.o : sender.c
 # If we run `make debug` instead, keep the debug symbols for gdb
 # and define the DEBUG macro.
 debug: CFLAGS += -g -DDEBUG -Wno-unused-parameter -fno-omit-frame-pointer
-debug: clean sender
+debug: clean sender receiver
 
 .PHONY: clean
 
