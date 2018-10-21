@@ -12,6 +12,7 @@ int get_port(const char *portstring, const char *caller) {
 		printf("[ERROR] [%s] Invalid port (value must be less than 65535): %s\n", caller, portstring);
 		return -1;
 	}
+	printf("[LOG] [RECEIVER] Port initialised\n");
 	return (int) l;
 }
 
@@ -119,6 +120,7 @@ int main(int argc, char *argv[]) {
 					memset(fn, 0, FILE_SIZE);
 					memcpy(fn, optarg, strlen(optarg));
 					file_specified = 1;
+					printf("[LOG] [RECEIVER] File specified: %s\n", fn);
 					break;
 				default:
 					return EXIT_FAILURE;
@@ -128,8 +130,12 @@ int main(int argc, char *argv[]) {
 
 	// need to specify at least 2 arguments: hostname and port
 	if (argc < 2) {
+		printf("[ERROR] [RECEIVER] Need 2 arguments\n");
 		return EXIT_FAILURE;
 	}
+
+	argc -= optind;
+	argv += optind;
 
 	char *hostname = argv[0];  // host name
 	char *portstr = argv[1];  // port number argument
@@ -143,8 +149,11 @@ int main(int argc, char *argv[]) {
 			return EXIT_FAILURE;
 		}
 		f = fopen(fn, "a+");
-		if (f == NULL)
+		if (f == NULL) {
 			printf("[ERROR] [RECEIVER] Failed to open file: %s\n", fn);
+		} else {
+			printf("[LOG] [RECEIVER] Opened file: %s\n", fn);
+		}
 	}
 
 	// resolve address
@@ -164,6 +173,7 @@ int main(int argc, char *argv[]) {
 
 	// bind to socket
 	int sfd = create_socket(&addr, port, NULL, -1);
+	printf("Connected to socket %d\n", sfd);
 	if (sfd > 0 && wait_for_client(sfd) < 0) {
 		printf("[ERROR] [RECEIVER] Could not connect to socket\n");
 		close(sfd);
@@ -172,6 +182,7 @@ int main(int argc, char *argv[]) {
 
 	// listen in on the appropriate channel
 	if (file_specified) {
+		printf("[LOG] [RECEIVER] Ready to receive data\n");
 		receive_data(f, sfd);
 	} else {
 		receive_data(stdout, sfd);

@@ -18,7 +18,7 @@ LDFLAGS= -rdynamic -lz
 # Default target
 all: clean sender
 
-COMMON = tools.c send_receive.c packet_implem.c
+COMMON = tools.c send_receive.c packet_implem.c min_queue.c
 
 # Receiver
 receiver:
