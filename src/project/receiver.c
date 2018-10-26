@@ -1,5 +1,7 @@
 #include "utilities.h"
 
+char *lastack;
+
 int get_port(const char *portstring, const char *caller) {
 	long l = -1;
 	if ((l = strtol(portstring, NULL, 10)) == 0) {
@@ -31,23 +33,20 @@ int equal(const void *a, const void *b) {
 void send_acknowledgment(int sfd, pkt_t *packet, uint8_t wdw, uint8_t type) {
 	uint8_t seqnum = pkt_get_seqnum(packet);
 	uint16_t ts = pkt_get_timestamp(packet);
-	char *buf;
 	if (type == PTYPE_ACK) {
-		buf = pkt_create(type, wdw, pkt_get_length(packet) == 0 ? seqnum : succ(seqnum), ts);
+		lastack = pkt_create(type, wdw, pkt_get_length(packet) == 0 ? seqnum : succ(seqnum), ts);
 	} else {
-		buf = pkt_create(type, wdw, seqnum, ts);
+		lastack = pkt_create(type, wdw, seqnum, ts);
 	}
-	if (write(sfd, buf, 12) < 0) {
+	if (write(sfd, lastack, 12) < 0) {
 		printf("[ERROR] [RECEIVER] Error while sending (N)ACK\n");
 	} else {
 		printf("[LOG] [RECEIVER] (N)ACK sent\n");
 	}
-	free(buf);
 }
 
 int write_data(FILE *f, pkt_t *packet) {
 	printf("[LOG] [RECEIVER] Writing payload to file\n");
-	f = f;
 	size_t write = fwrite(pkt_get_payload(packet), sizeof(char), pkt_get_length(packet), f);
 	if (write != pkt_get_length(packet)) {
 		printf("[ERROR] [RECEIVER] Error while writing payload to file\n");
@@ -86,6 +85,13 @@ static void receive_data(FILE *f, int sfd) {
 	int i = 0;
 	*/
 
+	struct timespec last_time;
+	int errc= clock_gettime(CLOCK_MONOTONIC, &last_time);
+	if (errc != 0) {
+		perror("Erorr with dc timer\n");
+		return;
+	}
+
 	while (cont/* && i == 0*/) {
 		// i++;
 
@@ -102,17 +108,32 @@ static void receive_data(FILE *f, int sfd) {
 		size_t bytes_read = 216;
 		*/
 
-		printf("this is the buffer : %d\n", buffer[0]);
+		struct timespec timee;
+		int errcd= clock_gettime(CLOCK_MONOTONIC, &timee);
+		if (errcd != 0) {
+			perror("Error with dc timer\n");
+			return;
+		}
+
+		int timeout = 10;
+		if (timee.tv_sec - last_time.tv_sec > timeout) {
+			printf("[LOG] [RECEIVER] No transmission for %d s; disconnect\n", timeout);
+			return;
+		}
+		last_time = timee;
 
 		pkt_t *packet = pkt_new();
 		pkt_status_code pkt_status = pkt_decode(buffer, bytes_read, packet);
 
 		if (pkt_status == PKT_OK) {
-			if (window_size > 0) {
+			uint8_t seqnum = pkt_get_seqnum(packet);
+			if ((((seqnum > last_seqnum)
+				&&(seqnum <= last_seqnum + window_size)
+				&&(last_seqnum+window_size < 256))
+			||((last_seqnum + window_size > 256) && ((seqnum > last_seqnum)
+				|| (seqnum < (last_seqnum + window_size)%256))))) {
 				minq_push(pkt_queue, packet);
-				--window_size;
 				while (!minq_empty(pkt_queue) && ((pkt_t *) minq_peek(pkt_queue))->seqnum == succ(last_seqnum)) {
-					++window_size;
 					if (pkt_get_length(packet) == 0) {
 						printf("[LOG] [RECEIVER] Terminating packet received\n");
 						cont = false;
@@ -121,14 +142,16 @@ static void receive_data(FILE *f, int sfd) {
 						if (write_data(f, packet) != 0) {
 							return;
 						}
+						send_acknowledgment(sfd, packet, window_size, PTYPE_ACK);
+						last_seqnum = succ(last_seqnum);
 					}
-					send_acknowledgment(sfd, packet, window_size, PTYPE_ACK);
-					last_seqnum = succ(last_seqnum);
 					minq_pop(pkt_queue);
 					pkt_del(packet);
 				}
 			} else {
-				printf("[LOG] [RECEIVER] Buffer is full\n");
+				printf("[LOG] [RECEIVER] Sequence number not in window\n");
+				if (lastack != NULL)
+					write(sfd, lastack, 12);
 				pkt_del(packet);
 			}
 		} else {
@@ -136,12 +159,6 @@ static void receive_data(FILE *f, int sfd) {
 				send_acknowledgment(sfd, packet, window_size, PTYPE_NACK);
 				printf("[LOG] [RECEIVER] Packet %d truncated", pkt_get_seqnum(packet));
 			} else {
-						printf("after %ld\n", bytes_read);
-
-				for(int j = 0; j<528; j++){
-					printf("%x", buffer[j]);
-				}
-													printf("after\n");
 				printf("[LOG] [RECEIVER] Packet status not OK, %d \n", pkt_status==E_CRC);
 			}
 			pkt_del(packet);
@@ -226,8 +243,10 @@ int main(int argc, char *argv[]) {
 	// listen in on the appropriate channel
 	if (file_specified) {
 		printf("[LOG] [RECEIVER] Ready to receive data\n");
+		lastack = NULL;
 		receive_data(f, sfd);
 		fclose(f);
+		free(lastack);
 	} else {
 		receive_data(stdout, sfd);
 	}

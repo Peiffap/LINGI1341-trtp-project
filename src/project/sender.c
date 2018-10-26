@@ -11,7 +11,7 @@
 
 #define MAX_PAYLOAD_LENGTH 512
 #define MAX_SEQNUM 256
-#define TIMEOUT 999
+#define TIMEOUT 100000
 
 
 uint8_t lastseqnum = 0;
@@ -29,6 +29,7 @@ struct dataqueue *firsttosend = NULL;
 struct dataqueue *lasttosend = NULL;
 uint8_t lastackseqnum = 0;
 int pkt_waiting = 0;
+int pkt_to_send = 0;
 
 
 int remove_pkt(uint8_t seqnum){
@@ -96,13 +97,6 @@ int send_pkt(const int sfd){
 			perror("error clock in sending data");
 			return -1;
 		}
-		printf("before %d \n", firsttosend->len);
-
-		for(int i = 0; i<528; i++){
-			printf("%x", firsttosend->bufpkt[i]);
-		}
-
-			printf("before\n");
 
 		firsttosend = firsttosend->next;
 	}
@@ -202,94 +196,14 @@ int disconnect(int sfd){
 
 		return -1;
 	}
-
-
-
-	struct timeval tv;
-	fd_set readfds;
-	tv.tv_sec= 1;
-	tv.tv_usec = 0;
-
-	char buf2[sizeof(pkt_t)];
-
-	int end = 0;
-	int err;
-	while (!end) {
-		memset((void *) buf2, 0, sizeof(pkt_t));
-		FD_ZERO(&readfds);
-		FD_SET(sfd, &readfds);
-
-		select(sfd + 1, &readfds, NULL, NULL, &tv);
-
-		if (FD_ISSET(sfd, &readfds)) {
-			printf("[LOG] [SENDER] response to disconnection request? \n");
-
-			err = read(sfd, buf2, sizeof(pkt_t));
-			printf("%d %d\n",err, errno);
-			if (err <= 0){
-				perror("error reading from socket in disconnection: ");
-				return -1;
-			}
-			pkt_t *ack = pkt_new();
-			err = pkt_decode(buf2, err, ack);
-			if(err != PKT_OK){
-				perror("error decoding ack in disconnection");
-				pkt_del(ack);
-				return -1;
-			}
-			int seqnum = pkt_get_seqnum(ack);
-
-
-			if(pkt_get_type(ack) == PTYPE_ACK){
-
-				if(seqnum == lastackseqnum){
-					printf("[LOG] [SENDER] disconnection ok \n");
-
-					pkt_del(ack);
-					end = 1;
-					return 0;
-				}
-			}
-
-		}
-
-		struct timespec time;
-		int errc = clock_gettime(CLOCK_MONOTONIC,&time);
-		if(errc!=0){
-			perror("error get time in send data");
-			return -1;
-		}
-		if(((time.tv_sec - time1.tv_sec)*1000000 + (time.tv_nsec - time1.tv_nsec)/1000)>TIMEOUT){
-
-		//RESEND DATA
-		printf("[LOG] [SENDER] disconnection timeout, resend request\n");
-
-			int errw1 = write(sfd, bufpkt, totlen);
-			if(errw1 <0){
-				perror("error writing pkt in resending pkt");
-				return -1;
-			}
-
-			errw1 = clock_gettime(CLOCK_MONOTONIC,&time1);
-
-			if(errw1!=0){
-				perror("error clock in resending data");
-				return -1;
-			}
-
-		}
-
-	}
-
-	return -1;
-
+	return 0;
 }
 int send_data(const int sfd, const int fd){
 
 	struct timeval tv;
 	fd_set readfds;
 	tv.tv_sec= 0;
-	tv.tv_usec = 100;
+	tv.tv_usec = 100000;
 
 	char buf1[MAX_PAYLOAD_LENGTH];
 	char buf2[sizeof(pkt_t)+MAX_PAYLOAD_LENGTH];
@@ -313,7 +227,6 @@ int send_data(const int sfd, const int fd){
 		}
 		if (FD_ISSET(fd, &readfds)) {
 		    	err = read(fd, buf1, MAX_PAYLOAD_LENGTH);
-			printf("[LOG] [SENDER] reading data %d\n", buf1[0]);
 			if (err < 0 ){
 				perror("error read fd in send data ");
 				printf("[ERR] [SENDER] %d, %d \n", err, errno);
@@ -326,15 +239,16 @@ int send_data(const int sfd, const int fd){
 					return -1;
 				}
 				pkt_waiting ++;
+				pkt_to_send++;
 			}
 			if(err == 0){
 				stop = 0;
 			}
-			printf("[LOG] [SENDER] err read %d, %d \n", err, errno);
 		}
 
-		if(pkt_waiting >0){
+		if(pkt_to_send >0){
 			int errsend = send_pkt(sfd);
+			pkt_to_send--;
 
 			printf("[LOG] [SENDER] sending data \n");
 			if(errsend !=0){
@@ -357,7 +271,7 @@ int send_data(const int sfd, const int fd){
 			pkt_t *ack = pkt_new();
 			err = pkt_decode(buf2, err, ack);
 			if(err != PKT_OK){
-				perror("error decoding ack");
+				perror("decoding ack");
 				pkt_del(ack);
 				return -1;
 			}

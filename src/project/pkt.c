@@ -92,23 +92,19 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
 
 pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
 {
-	printf("enter encode\n");
 	if((pkt_get_crc2(pkt) == 0)&&(*len<pkt_get_length(pkt)+3*sizeof(uint32_t))){
 		return E_NOMEM;
 	}
 	else if((pkt_get_crc2(pkt)!=0)&&(*len<pkt_get_length(pkt)+4*sizeof(uint32_t))){
 		return E_NOMEM;
 	}
-	printf("two tests completed\n");
 	// window, tr et type
 	memcpy(buf, pkt, sizeof(uint8_t));
 	*len = sizeof(uint8_t);
-	printf("window tr type\n");
 	// seqnum
 	uint8_t seqnum = pkt_get_seqnum(pkt);
 	memcpy(buf+1, &seqnum,sizeof(uint8_t));
 	*len += sizeof(uint8_t);
-	printf("seqnum\n");
 	// length
 	uint16_t length = pkt_get_length(pkt);
 	uint16_t nlength = htons(length);
