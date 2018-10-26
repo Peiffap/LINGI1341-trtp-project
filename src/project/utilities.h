@@ -20,6 +20,7 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include "min_queue.h"
+#include <math.h>
 
 #define STDIN 0
 #define STDOUT 1

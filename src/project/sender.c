@@ -36,8 +36,10 @@ int remove_pkt(uint8_t seqnum){
 
 
 
-	if(current->seqnum <= seqnum){
+	if(current != NULL && current->seqnum <= seqnum){
 		startofqueue = current->next;
+		pkt_waiting--;
+		free(current->bufpkt);
 		free(current);
 	}
 	else{
@@ -47,6 +49,8 @@ int remove_pkt(uint8_t seqnum){
 			if(current->seqnum <= seqnum){
 
 				before->next = current->next;
+				pkt_waiting--;
+				free(current->bufpkt);
 				free(current);
 
 			}
@@ -58,9 +62,11 @@ int remove_pkt(uint8_t seqnum){
 
 		}
 	}
-	if(startofqueue->seqnum <= seqnum){
+	if(startofqueue != NULL && startofqueue->seqnum <= seqnum){
 		current = startofqueue;
 		startofqueue = startofqueue->next;
+		pkt_waiting--;
+		free(current->bufpkt);
 		free(current);
 	}
 
@@ -75,7 +81,7 @@ int send_pkt(const int sfd){
 			&&(firstseqnumwindow+window< MAX_SEQNUM))
 		||((firstseqnumwindow+window> MAX_SEQNUM)&&((firsttosend->seqnum >= firstseqnumwindow)
 			||(firsttosend->seqnum < (firstseqnumwindow + window)%MAX_SEQNUM))))){
-		
+
 		int err = write(sfd, firsttosend->bufpkt, firsttosend->len);
 		printf("[LOG] [SENDER] writing pkt on socket \n");
 		printf("%d %d \n", firsttosend->bufpkt[0], firsttosend->bufpkt[100]);
@@ -85,7 +91,7 @@ int send_pkt(const int sfd){
 		}
 
 		err = clock_gettime(CLOCK_MONOTONIC,&(firsttosend->time));
-		
+
 		if(err!=0){
 			perror("error clock in sending data");
 			return -1;
@@ -111,7 +117,11 @@ int add_pkt_to_queue( char* buf, int len){
 	printf("[LOG] [SENDER] adding pkt to queue \n");
 	int timestamp = 0; // How do we use the timestamp ??
 	pkt_t * newpkt = pkt_create_sender(window, lastseqnum, len, timestamp, buf);
-	char bufpkt[len+4*sizeof(uint32_t)];
+	char *bufpkt = malloc(len+4*sizeof(uint32_t));
+	if(bufpkt==NULL){
+		perror("error malloc in add pkt to queue");
+		return -1;
+	}
 	size_t totlen = len+4*sizeof(uint32_t);
 	pkt_status_code ret = pkt_encode(newpkt, bufpkt, &totlen);
 
@@ -128,19 +138,19 @@ int add_pkt_to_queue( char* buf, int len){
 	}
 	if(lasttosend!=NULL){
 		lasttosend->next = newdata;
-		lasttosend = newdata;		
+		lasttosend = newdata;
 		lasttosend->bufpkt = bufpkt;
 		lasttosend->seqnum = lastseqnum;
 		lasttosend->len = totlen;
 		lasttosend->next = NULL;
 	}
 	else{
-		lasttosend = newdata;		
+		lasttosend = newdata;
 		lasttosend->bufpkt = bufpkt;
 		lasttosend->seqnum = lastseqnum;
 		lasttosend->len = totlen;
 		lasttosend->next = NULL;
-		
+
 	}
 	if(firsttosend == NULL){
 		firsttosend = lasttosend;
@@ -186,7 +196,7 @@ int disconnect(int sfd){
 
 	struct timespec time1;
 	errw = clock_gettime(CLOCK_MONOTONIC,&time1);
-	
+
 	if(errw!=0){
 		perror("error clock in disconnect");
 
@@ -261,14 +271,14 @@ int disconnect(int sfd){
 			}
 
 			errw1 = clock_gettime(CLOCK_MONOTONIC,&time1);
-			
+
 			if(errw1!=0){
 				perror("error clock in resending data");
 				return -1;
 			}
 
 		}
-		
+
 	}
 
 	return -1;
@@ -287,20 +297,20 @@ int send_data(const int sfd, const int fd){
 
 	int err;
 	int stop = 1;
-	while ((!feof(stdin))&&(stop)) {
+	while (pkt_waiting > 0 || stop) {
 		memset((void *) buf1, 0, MAX_PAYLOAD_LENGTH);
 		memset((void *) buf2, 0, sizeof(pkt_t)+MAX_PAYLOAD_LENGTH);
 		FD_ZERO(&readfds);
 		FD_SET(fd, &readfds);
 		FD_SET(sfd, &readfds);
 
-		int selerr = select(sfd + 1, &readfds, NULL, NULL, &tv);
-		
+		int selerr = select(fd > sfd ? fd + 1 : sfd + 1, &readfds, NULL, NULL, &tv);
+
 		if (selerr == -1){
 			perror("error select");
 			return -1;
-			
-		}		
+
+		}
 		if (FD_ISSET(fd, &readfds)) {
 		    	err = read(fd, buf1, MAX_PAYLOAD_LENGTH);
 			printf("[LOG] [SENDER] reading data %d\n", buf1[0]);
@@ -325,14 +335,13 @@ int send_data(const int sfd, const int fd){
 
 		if(pkt_waiting >0){
 			int errsend = send_pkt(sfd);
-			pkt_waiting--;
 
 			printf("[LOG] [SENDER] sending data \n");
 			if(errsend !=0){
 				perror("error sending pkt");
 				return -1;
 			}
-			
+
 		}
 
 		if (FD_ISSET(sfd, &readfds)) { // Data incoming from socket
@@ -358,12 +367,12 @@ int send_data(const int sfd, const int fd){
 			if(pkt_get_type(ack) == PTYPE_ACK){
 			printf("[LOG] [SENDER] this is an ack \n");
 
-				firstseqnumwindow = (pkt_get_seqnum(ack)%MAX_SEQNUM);	
+				firstseqnumwindow = (pkt_get_seqnum(ack)%MAX_SEQNUM);
 				remove_pkt(seqnum);
-				
-			
 
-				
+
+
+
 			}
 			if(pkt_get_type(ack) == PTYPE_NACK){
 
@@ -388,7 +397,7 @@ int send_data(const int sfd, const int fd){
 				}
 
 				errw = clock_gettime(CLOCK_MONOTONIC,&(current->time));
-				
+
 				if(errw!=0){
 					perror("error clock in resending data");
 					pkt_del(ack);
@@ -399,9 +408,9 @@ int send_data(const int sfd, const int fd){
 
 			pkt_del(ack);
 		}
-			
-	
-		
+
+
+
 		struct timespec time;
 		int errc = clock_gettime(CLOCK_MONOTONIC,&time);
 		if(errc!=0){
@@ -421,7 +430,7 @@ int send_data(const int sfd, const int fd){
 				}
 
 				errw = clock_gettime(CLOCK_MONOTONIC,&(current->time));
-				
+
 				if(errw!=0){
 					perror("error clock in resending data");
 					return -1;
@@ -430,7 +439,7 @@ int send_data(const int sfd, const int fd){
 			}
 			current = current->next;
 		}
-		
+
 
 	}
 
@@ -448,7 +457,6 @@ int send_data(const int sfd, const int fd){
 
 
 int main( int argc, char * argv[]){
-
 	if(argc <3){ // Not enough arguments
 		perror("Not enough arguments");
 		return -1;
@@ -462,7 +470,7 @@ int main( int argc, char * argv[]){
 		filename = argv[2];
 		struct stat sf;
 		if(stat(filename, &sf)==-1){ // file does not exist
-			perror("File does not exist");			
+			perror("File does not exist");
 			return -1;
 		}
 
@@ -471,11 +479,11 @@ int main( int argc, char * argv[]){
 	}
 	else{
 		hostname = argv[1];
-		port = atoi(argv[2]);	
+		port = atoi(argv[2]);
 	}
- 	
+
 	if (port <= 0){
-		perror("Invalid port");	
+		perror("Invalid port");
 		return -1;
 	}
 	struct sockaddr_in6 dest_addr;
@@ -494,14 +502,14 @@ int main( int argc, char * argv[]){
 	}
 
 	if(filename !=NULL){
-		
+
 		int fd = open(filename, O_RDONLY);
 		if( fd<0){
 			perror("Error opening the file");
 
 			return -1;
 		}
-		
+
 		int err1 = send_data(sfd, fd);
 
 		if(err1 ==-1){
@@ -511,7 +519,7 @@ int main( int argc, char * argv[]){
 		}
 
 		close(fd);
-		
+
 	}
 	else {
 

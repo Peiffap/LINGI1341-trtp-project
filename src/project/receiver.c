@@ -33,7 +33,7 @@ void send_acknowledgment(int sfd, pkt_t *packet, uint8_t wdw, uint8_t type) {
 	uint16_t ts = pkt_get_timestamp(packet);
 	char *buf;
 	if (type == PTYPE_ACK) {
-		buf = pkt_create(type, wdw, succ(seqnum), ts);
+		buf = pkt_create(type, wdw, pkt_get_length(packet) == 0 ? seqnum : succ(seqnum), ts);
 	} else {
 		buf = pkt_create(type, wdw, seqnum, ts);
 	}
@@ -46,7 +46,9 @@ void send_acknowledgment(int sfd, pkt_t *packet, uint8_t wdw, uint8_t type) {
 }
 
 int write_data(FILE *f, pkt_t *packet) {
-	size_t write = fwrite(pkt_get_payload(packet), sizeof(uint8_t), pkt_get_length(packet), f);
+	printf("[LOG] [RECEIVER] Writing payload to file\n");
+	f = f;
+	size_t write = fwrite(pkt_get_payload(packet), sizeof(char), pkt_get_length(packet), f);
 	if (write != pkt_get_length(packet)) {
 		printf("[ERROR] [RECEIVER] Error while writing payload to file\n");
 		return -1;
@@ -61,35 +63,44 @@ static void receive_data(FILE *f, int sfd) {
 	uint8_t window_size = 31;
 	minqueue_t *pkt_queue = minq_new(cmp, equal);
 
+	/*
 	pkt_t *test = pkt_new();
 	pkt_set_type(test, PTYPE_DATA);
 	pkt_set_tr(test, 0);
 	pkt_set_window(test, 0b00011111);
 	pkt_set_seqnum(test, 0b00000000);
-	pkt_set_length(test, 7);
-	pkt_set_timestamp(test, 0b00011111000111110001111100011111);
+	pkt_set_length(test, 200);
+	pkt_set_timestamp(test, 0b00000000000000000000000000000000);
 	pkt_set_crc1(test, 0b00011111000111110001111100011111);
-	pkt_set_payload(test, "werner", 7);
+	char pl_string[513];
+	int pos;
+	for (pos = 0; pos < 512; pos++) {
+		pl_string[pos] = 'A';
+	}
+	pl_string[512] = '\0';
+	pkt_set_payload(test, pl_string, strlen(pl_string));
 	pkt_set_crc2(test, 0b00011111000111110001111100011111);
 
 	printf("Packet defined\n");
 
 	int i = 0;
+	*/
 
-	while (cont && i == 0) {
-		i++;
-		
+	while (cont/* && i == 0*/) {
+		// i++;
+
 		ssize_t bytes_read = recv(sfd, buffer, 512+4*sizeof(uint32_t), 0);
 		if (bytes_read == -1) {
 			printf("[ERROR] [RECEIVER] Invalid read from socket\n");
 			continue;
 		}
-		/*
 
+		/*
 		size_t len;
 		pkt_status_code pkt_stat = pkt_encode(test, buffer, &len);
 		printf("%d", pkt_stat);
-		size_t bytes_read = 23;*/
+		size_t bytes_read = 216;
+		*/
 
 		printf("this is the buffer : %d\n", buffer[0]);
 
@@ -100,7 +111,7 @@ static void receive_data(FILE *f, int sfd) {
 			if (window_size > 0) {
 				minq_push(pkt_queue, packet);
 				--window_size;
-				while (((pkt_t *) minq_peek(pkt_queue))->seqnum == succ(last_seqnum)) {
+				while (!minq_empty(pkt_queue) && ((pkt_t *) minq_peek(pkt_queue))->seqnum == succ(last_seqnum)) {
 					++window_size;
 					if (pkt_get_length(packet) == 0) {
 						printf("[LOG] [RECEIVER] Terminating packet received\n");
@@ -110,10 +121,9 @@ static void receive_data(FILE *f, int sfd) {
 						if (write_data(f, packet) != 0) {
 							return;
 						}
-
-						send_acknowledgment(sfd, packet, window_size, PTYPE_ACK);
-						last_seqnum = succ(last_seqnum);
 					}
+					send_acknowledgment(sfd, packet, window_size, PTYPE_ACK);
+					last_seqnum = succ(last_seqnum);
 					minq_pop(pkt_queue);
 					pkt_del(packet);
 				}
@@ -206,21 +216,20 @@ int main(int argc, char *argv[]) {
 	// bind to socket
 	int sfd = create_socket(&addr, port, NULL, -1);
 	printf("Connected to socket %d\n", sfd);
-	/*
+
 	if (sfd > 0 && wait_for_client(sfd) < 0) {
 		printf("[ERROR] [RECEIVER] Could not connect to socket\n");
 		close(sfd);
 		return EXIT_FAILURE;
 	}
-	*/
 
 	// listen in on the appropriate channel
 	if (file_specified) {
 		printf("[LOG] [RECEIVER] Ready to receive data\n");
 		receive_data(f, sfd);
+		fclose(f);
 	} else {
 		receive_data(stdout, sfd);
 	}
-	fclose(f);
 	return EXIT_SUCCESS;
 }
