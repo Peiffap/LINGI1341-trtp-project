@@ -39,17 +39,17 @@ void send_acknowledgment(int sfd, pkt_t *packet, uint8_t wdw, uint8_t type) {
 		lastack = pkt_create(type, wdw, seqnum, ts);
 	}
 	if (write(sfd, lastack, 12) < 0) {
-		printf("[ERROR] [RECEIVER] Error while sending (N)ACK\n");
+		printf("[ERROR] [RECEIVER] Error while sending (N)ACK for packet %d\n", seqnum);
 	} else {
-		printf("[LOG] [RECEIVER] (N)ACK sent\n");
+		printf("[LOG] [RECEIVER] (N)ACK sent for %d w/ seqnum %d\n", seqnum, succ(seqnum));
 	}
 }
 
 int write_data(FILE *f, pkt_t *packet) {
-	printf("[LOG] [RECEIVER] Writing payload to file\n");
+	printf("[LOG] [RECEIVER] Writing payload for packet %d to file\n", pkt_get_seqnum(packet));
 	size_t write = fwrite(pkt_get_payload(packet), sizeof(char), pkt_get_length(packet), f);
 	if (write != pkt_get_length(packet)) {
-		printf("[ERROR] [RECEIVER] Error while writing payload to file\n");
+		printf("[ERROR] [RECEIVER] Error while writing payload for packet %d to file\n", pkt_get_seqnum(packet));
 		return -1;
 	}
 	return 0;
@@ -62,29 +62,6 @@ static void receive_data(FILE *f, int sfd) {
 	uint8_t window_size = 31;
 	minqueue_t *pkt_queue = minq_new(cmp, equal);
 
-	/*
-	pkt_t *test = pkt_new();
-	pkt_set_type(test, PTYPE_DATA);
-	pkt_set_tr(test, 0);
-	pkt_set_window(test, 0b00011111);
-	pkt_set_seqnum(test, 0b00000000);
-	pkt_set_length(test, 200);
-	pkt_set_timestamp(test, 0b00000000000000000000000000000000);
-	pkt_set_crc1(test, 0b00011111000111110001111100011111);
-	char pl_string[513];
-	int pos;
-	for (pos = 0; pos < 512; pos++) {
-		pl_string[pos] = 'A';
-	}
-	pl_string[512] = '\0';
-	pkt_set_payload(test, pl_string, strlen(pl_string));
-	pkt_set_crc2(test, 0b00011111000111110001111100011111);
-
-	printf("Packet defined\n");
-
-	int i = 0;
-	*/
-
 	struct timespec last_time;
 	int errc= clock_gettime(CLOCK_MONOTONIC, &last_time);
 	if (errc != 0) {
@@ -92,21 +69,13 @@ static void receive_data(FILE *f, int sfd) {
 		return;
 	}
 
-	while (cont/* && i == 0*/) {
-		// i++;
+	while (cont) {
 
 		ssize_t bytes_read = recv(sfd, buffer, 512+4*sizeof(uint32_t), 0);
 		if (bytes_read == -1) {
 			printf("[ERROR] [RECEIVER] Invalid read from socket\n");
 			continue;
 		}
-
-		/*
-		size_t len;
-		pkt_status_code pkt_stat = pkt_encode(test, buffer, &len);
-		printf("%d", pkt_stat);
-		size_t bytes_read = 216;
-		*/
 
 		struct timespec timee;
 		int errcd= clock_gettime(CLOCK_MONOTONIC, &timee);
@@ -115,7 +84,7 @@ static void receive_data(FILE *f, int sfd) {
 			return;
 		}
 
-		int timeout = 10;
+		int timeout = 1000;
 		if (timee.tv_sec - last_time.tv_sec > timeout) {
 			printf("[LOG] [RECEIVER] No transmission for %d s; disconnect\n", timeout);
 			return;
@@ -127,15 +96,11 @@ static void receive_data(FILE *f, int sfd) {
 
 		if (pkt_status == PKT_OK) {
 			uint8_t seqnum = pkt_get_seqnum(packet);
-			if ((((seqnum > last_seqnum)
-				&&(seqnum <= last_seqnum + window_size)
-				&&(last_seqnum+window_size < 256))
-			||((last_seqnum + window_size > 256) && ((seqnum > last_seqnum)
-				|| (seqnum < (last_seqnum + window_size)%256))))) {
+			if ((seqnum > last_seqnum && seqnum < last_seqnum + window_size + 1) || ((last_seqnum + window_size > 255) && ((seqnum > last_seqnum) || (seqnum < (last_seqnum + window_size + 1) % 256)))) {
 				minq_push(pkt_queue, packet);
 				while (!minq_empty(pkt_queue) && ((pkt_t *) minq_peek(pkt_queue))->seqnum == succ(last_seqnum)) {
 					if (pkt_get_length(packet) == 0) {
-						printf("[LOG] [RECEIVER] Terminating packet received\n");
+						printf("[LOG] [RECEIVER] Terminating packet received with seqnum %d\n", pkt_get_seqnum(packet));
 						cont = false;
 					} else {
 						printf("[LOG] [RECEIVER] Data packet %d received\n", pkt_get_seqnum(packet));
@@ -149,7 +114,7 @@ static void receive_data(FILE *f, int sfd) {
 					pkt_del(packet);
 				}
 			} else {
-				printf("[LOG] [RECEIVER] Sequence number not in window\n");
+				printf("[LOG] [RECEIVER] Sequence number %d not in window with start at %d and size %d\n", pkt_get_seqnum(packet), last_seqnum+1, window_size);
 				if (lastack != NULL)
 					write(sfd, lastack, 12);
 				pkt_del(packet);
@@ -159,7 +124,7 @@ static void receive_data(FILE *f, int sfd) {
 				send_acknowledgment(sfd, packet, window_size, PTYPE_NACK);
 				printf("[LOG] [RECEIVER] Packet %d truncated", pkt_get_seqnum(packet));
 			} else {
-				printf("[LOG] [RECEIVER] Packet status not OK, %d \n", pkt_status==E_CRC);
+				printf("[LOG] [RECEIVER] Packet status not OK (erro code %d) for packet %d \n", pkt_status==E_CRC, pkt_get_seqnum(packet));
 			}
 			pkt_del(packet);
 		}

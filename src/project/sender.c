@@ -27,12 +27,13 @@ struct dataqueue {
 struct dataqueue *startofqueue = NULL;
 struct dataqueue *firsttosend = NULL;
 struct dataqueue *lasttosend = NULL;
-uint8_t lastackseqnum = 0;
+uint8_t lastackseqnum = -1;
 int pkt_waiting = 0;
 int pkt_to_send = 0;
 
 
 int remove_pkt(uint8_t seqnum){
+	printf("[LOG] [SENDER] Removing packet with sequence number %d\n", seqnum);
 	struct dataqueue *current = startofqueue;
 
 
@@ -70,8 +71,12 @@ int remove_pkt(uint8_t seqnum){
 		free(current->bufpkt);
 		free(current);
 	}
-
+	printf("[LOG] [SENDER] Packet with sequence number %d removed\n", seqnum);
 	return 0;
+}
+
+int succ(int seqnum) {
+	return (seqnum + 1) % 256;
 }
 
 int send_pkt(const int sfd){
@@ -84,8 +89,7 @@ int send_pkt(const int sfd){
 			||(firsttosend->seqnum < (firstseqnumwindow + window)%MAX_SEQNUM))))){
 
 		int err = write(sfd, firsttosend->bufpkt, firsttosend->len);
-		printf("[LOG] [SENDER] writing pkt on socket \n");
-		printf("%d %d \n", firsttosend->bufpkt[0], firsttosend->bufpkt[100]);
+		printf("[LOG] [SENDER] Writing packet with seqnum %d to socket\n", firsttosend->seqnum);
 		if(err <0){
 			perror("error writing pkt");
 			return -1;
@@ -108,9 +112,9 @@ int send_pkt(const int sfd){
 
 
 int add_pkt_to_queue( char* buf, int len){
-	printf("[LOG] [SENDER] adding pkt to queue \n");
 	int timestamp = 0; // How do we use the timestamp ??
 	pkt_t * newpkt = pkt_create_sender(window, lastseqnum, len, timestamp, buf);
+	printf("[LOG] [SENDER] Adding packet %d to the queue \n", lastseqnum);
 	char *bufpkt = malloc(len+4*sizeof(uint32_t));
 	if(bufpkt==NULL){
 		perror("error malloc in add pkt to queue");
@@ -153,7 +157,7 @@ int add_pkt_to_queue( char* buf, int len){
 		startofqueue = firsttosend;
 	}
 
-	printf("[LOG] [SENDER] finished adding pkt to queue %d \n", bufpkt[0]);
+	printf("[LOG] [SENDER] Finished adding packet %d to queue \n", lastseqnum);
 	lastseqnum = (lastseqnum + 1)%MAX_SEQNUM;
 
 	return 0;
@@ -163,10 +167,10 @@ int add_pkt_to_queue( char* buf, int len){
 
 int disconnect(int sfd){
 
-	printf("[LOG] [SENDER] disconnection \n");
+	printf("[LOG] [SENDER] Entering disconnection\n");
 
 	int timestamp = 0; // How do we use the timestamp ??
-	pkt_t * newpkt = pkt_create_sender(window, lastackseqnum, 0, timestamp, NULL);
+	pkt_t * newpkt = pkt_create_sender(window, succ(lastackseqnum), 0, timestamp, NULL);
 
 	char bufpkt[3*sizeof(uint32_t)];
 	size_t totlen = 3*sizeof(uint32_t);
@@ -176,8 +180,6 @@ int disconnect(int sfd){
 		return -1;
 	}
 
-	pkt_del(newpkt);
-
 	int errw = write(sfd, bufpkt, totlen);
 	if(errw <0){
 		perror("error writing pkt in disconnect");
@@ -185,7 +187,9 @@ int disconnect(int sfd){
 		return -1;
 	}
 
-	printf("[LOG] [SENDER] send disconnection pckt \n");
+	printf("[LOG] [SENDER] Sent disconnection packet with seqnum %d\n", pkt_get_seqnum(newpkt));
+
+	pkt_del(newpkt);
 
 
 	struct timespec time1;
@@ -211,7 +215,7 @@ int send_data(const int sfd, const int fd){
 
 	int err;
 	int stop = 1;
-	while (pkt_waiting > 0 || stop) {
+	while ((pkt_waiting > 0 || stop) || succ(lastackseqnum) != lastseqnum) {
 		memset((void *) buf1, 0, MAX_PAYLOAD_LENGTH);
 		memset((void *) buf2, 0, sizeof(pkt_t)+MAX_PAYLOAD_LENGTH);
 		FD_ZERO(&readfds);
@@ -229,7 +233,7 @@ int send_data(const int sfd, const int fd){
 		    	err = read(fd, buf1, MAX_PAYLOAD_LENGTH);
 			if (err < 0 ){
 				perror("error read fd in send data ");
-				printf("[ERR] [SENDER] %d, %d \n", err, errno);
+				printf("[ERROR] [SENDER] %d, %d \n", err, errno);
 				return -1;
 			}
 			if(err >0){
@@ -250,7 +254,6 @@ int send_data(const int sfd, const int fd){
 			int errsend = send_pkt(sfd);
 			pkt_to_send--;
 
-			printf("[LOG] [SENDER] sending data \n");
 			if(errsend !=0){
 				perror("error sending pkt");
 				return -1;
@@ -259,7 +262,7 @@ int send_data(const int sfd, const int fd){
 		}
 
 		if (FD_ISSET(sfd, &readfds)) { // Data incoming from socket
-			printf("[LOG] [SENDER] reading ack? from socket \n");
+			printf("[LOG] [SENDER] Trying to read ACK from socket\n");
 
 
 	    	err = read(sfd, buf2, sizeof(pkt_t)+MAX_PAYLOAD_LENGTH);
@@ -276,13 +279,14 @@ int send_data(const int sfd, const int fd){
 				return -1;
 			}
 			int seqnum = pkt_get_seqnum(ack);
-			lastackseqnum = seqnum;
+			lastackseqnum = seqnum-1;
+			printf("[LOG] [SENDER] Last received seqnum = %d\n", lastackseqnum);
 
 			if(pkt_get_type(ack) == PTYPE_ACK){
-			printf("[LOG] [SENDER] this is an ack \n");
+			printf("[LOG] [SENDER] ACK received for seqnum %d\n", lastackseqnum);
 
 				firstseqnumwindow = (pkt_get_seqnum(ack)%MAX_SEQNUM);
-				remove_pkt(seqnum);
+				remove_pkt(lastackseqnum);
 
 
 
@@ -290,7 +294,7 @@ int send_data(const int sfd, const int fd){
 			}
 			if(pkt_get_type(ack) == PTYPE_NACK){
 
-				printf("[LOG] [SENDER] this is a nack \n");
+				printf("[LOG] [SENDER] NACK received for seqnum %d\n", lastackseqnum);
 
 				struct dataqueue *current = startofqueue;
 				int search = 1;
@@ -336,7 +340,7 @@ int send_data(const int sfd, const int fd){
 			if(((time.tv_sec - current->time.tv_sec)*1000000 + (time.tv_nsec - current->time.tv_nsec)/1000)>TIMEOUT){
 
 			//RESEND DATA
-				printf("[LOG] [SENDER] time out, resending data \n");
+				printf("[LOG] [SENDER] Time out for packet, resending\n");
 				int errw = write(sfd, current->bufpkt, current->len);
 				if(errw <0){
 					perror("error writing pkt in resending pkt");
