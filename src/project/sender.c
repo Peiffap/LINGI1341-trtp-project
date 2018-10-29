@@ -15,7 +15,7 @@
 
 
 uint8_t lastseqnum = 0;
-uint8_t window = 15;
+uint8_t window = 1;
 uint8_t firstseqnumwindow = 0;
 struct dataqueue {
 	char *bufpkt;
@@ -48,6 +48,7 @@ int remove_pkt(uint8_t seqnum){
 		current = current->next;
 		struct dataqueue *before = startofqueue;
 		while(current!=NULL){
+			printf("[LOG] [SENDER] hello i am the sender and i am in a while loop hihi\n");
 			if(current->seqnum <= seqnum){
 
 				before->next = current->next;
@@ -79,16 +80,20 @@ int succ(int seqnum) {
 	return (seqnum + 1) % 256;
 }
 
+int is_in_window(int seqnum){
+	return ((((seqnum >= firstseqnumwindow)
+			&&(seqnum < firstseqnumwindow + window)
+			&&(firstseqnumwindow+window< MAX_SEQNUM))
+		||((firstseqnumwindow+window> MAX_SEQNUM)&&((seqnum >= firstseqnumwindow)
+			||(seqnum < (firstseqnumwindow + window)%MAX_SEQNUM)))));
+}
+
 int send_pkt(const int sfd){
 
-	if((firsttosend != NULL)&&
-		(((firsttosend->seqnum >= firstseqnumwindow)
-			&&(firsttosend->seqnum < firstseqnumwindow + window)
-			&&(firstseqnumwindow+window< MAX_SEQNUM))
-		||((firstseqnumwindow+window> MAX_SEQNUM)&&((firsttosend->seqnum >= firstseqnumwindow)
-			||(firsttosend->seqnum < (firstseqnumwindow + window)%MAX_SEQNUM))))){
+	if((firsttosend != NULL)&&(is_in_window(firsttosend->seqnum))){
 
 		int err = write(sfd, firsttosend->bufpkt, firsttosend->len);
+		pkt_to_send--;
 		printf("[LOG] [SENDER] Writing packet with seqnum %d to socket\n", firsttosend->seqnum);
 		if(err <0){
 			perror("error writing pkt");
@@ -229,8 +234,10 @@ int send_data(const int sfd, const int fd){
 			return -1;
 
 		}
-		if (FD_ISSET(fd, &readfds)) {
+		if (FD_ISSET(fd, &readfds) && stop) {
 		    	err = read(fd, buf1, MAX_PAYLOAD_LENGTH);
+
+			printf("Bytes read from input file %d \n", err);
 			if (err < 0 ){
 				perror("error read fd in send data ");
 				printf("[ERROR] [SENDER] %d, %d \n", err, errno);
@@ -249,11 +256,12 @@ int send_data(const int sfd, const int fd){
 				stop = 0;
 			}
 		}
+		
 
 		if(pkt_to_send >0){
 			int errsend = send_pkt(sfd);
-			pkt_to_send--;
 
+			printf("pkt_to_send %d\n", pkt_to_send);
 			if(errsend !=0){
 				perror("error sending pkt");
 				return -1;
@@ -262,12 +270,13 @@ int send_data(const int sfd, const int fd){
 		}
 
 		if (FD_ISSET(sfd, &readfds)) { // Data incoming from socket
-			printf("[LOG] [SENDER] Trying to read ACK from socket\n");
 
 
-	    	err = read(sfd, buf2, sizeof(pkt_t)+MAX_PAYLOAD_LENGTH);
 
-	    	if (err <= 0){
+		    	err = read(sfd, buf2, sizeof(pkt_t)+MAX_PAYLOAD_LENGTH);
+			printf("[LOG] [SENDER] done reading ACK from socket\n");
+
+		    	if (err <= 0){
 				perror("error reading from socket : ");
 				return -1;
 			}
@@ -279,13 +288,15 @@ int send_data(const int sfd, const int fd){
 				return -1;
 			}
 			int seqnum = pkt_get_seqnum(ack);
-			lastackseqnum = seqnum-1;
-			printf("[LOG] [SENDER] Last received seqnum = %d\n", lastackseqnum);
 
-			if(pkt_get_type(ack) == PTYPE_ACK){
-			printf("[LOG] [SENDER] ACK received for seqnum %d\n", lastackseqnum);
+			printf("here, %d\n", pkt_get_type(ack));
 
-				firstseqnumwindow = (pkt_get_seqnum(ack)%MAX_SEQNUM);
+			if((pkt_get_type(ack) == PTYPE_ACK)&& (is_in_window(seqnum-1))){
+				lastackseqnum = seqnum-1;
+				printf("[LOG] [SENDER] ACK received for seqnum %d\n", lastackseqnum);
+
+				printf("[LOG] [SENDER] Last received seqnum = %d\n", lastackseqnum);
+				firstseqnumwindow = (seqnum %MAX_SEQNUM);
 				remove_pkt(lastackseqnum);
 
 
@@ -299,6 +310,8 @@ int send_data(const int sfd, const int fd){
 				struct dataqueue *current = startofqueue;
 				int search = 1;
 				while((current!=0)&&(search)){
+
+					printf("sender nack loop\n");
 					if(current->seqnum == seqnum){
 						search = 0;
 					}
@@ -323,7 +336,7 @@ int send_data(const int sfd, const int fd){
 					return -1;
 				}
 			}
-
+			printf("pintade \n");
 			pkt_del(ack);
 		}
 
@@ -331,12 +344,15 @@ int send_data(const int sfd, const int fd){
 
 		struct timespec time;
 		int errc = clock_gettime(CLOCK_MONOTONIC,&time);
+		
 		if(errc!=0){
 			perror("error get time in send data");
 			return -1;
 		}
+		
 		struct dataqueue *current = startofqueue;
 		while (current != firsttosend) {
+
 			if(((time.tv_sec - current->time.tv_sec)*1000000 + (time.tv_nsec - current->time.tv_nsec)/1000)>TIMEOUT){
 
 			//RESEND DATA
