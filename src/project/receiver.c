@@ -79,6 +79,13 @@ static void receive_data(FILE *f, int sfd) {
 		return;
 	}
 
+	struct timespec rtstimer;
+	int errcdef= clock_gettime(CLOCK_MONOTONIC, &rtstimer);
+	if (errcdef != 0) {
+		perror("Error with dc timer\n");
+		return;
+	}
+
 	while (cont) {
 
 		ssize_t bytes_read = recv(sfd, buffer, 512+4*sizeof(uint32_t), 0);
@@ -94,12 +101,27 @@ static void receive_data(FILE *f, int sfd) {
 			return;
 		}
 
-		int timeout = 4;
+		int timeout = 400;
 		if (timee.tv_sec - last_time.tv_sec > timeout) {
 			printf("[LOG] [RECEIVER] No transmission for %d s; disconnect\n", timeout);
 			return;
 		}
 		last_time = timee;
+
+		struct timespec rts2timer;
+		int errcde= clock_gettime(CLOCK_MONOTONIC, &rts2timer);
+		if (errcde != 0) {
+			perror("Error with dc timer\n");
+			return;
+		}
+
+		int frts = 1;
+		if (rts2timer.tv_sec - rtstimer.tv_sec > frts) {
+			printf("[LOG] [RECEIVER] Fast retransmit ACK\n");
+			rtstimer = rts2timer;
+			if (lastack != NULL)
+				write(sfd, lastack, 12);
+		}
 
 		pkt_t *packet = pkt_new();
 		pkt_status_code pkt_status = pkt_decode(buffer, bytes_read, packet);
