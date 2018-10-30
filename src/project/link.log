@@ -1,11 +1,16 @@
+<<<<<<< HEAD
 @@ Using random seed: 1540927029
+=======
+@@ Using random seed: 1540927128
+>>>>>>> bffd1950163f9d3c295955dd3cf05a2a1b80d365
 @@ Using parameters:
 .. port: 1341
 .. forward_port: 2456
-.. delay: 50
+.. delay: 10
 .. jitter: 0
-.. err_rate: 0
+.. err_rate: 50
 .. cut_rate: 0
+<<<<<<< HEAD
 .. loss_rate: 90
 .. seed: 1540927029
 .. link_direction: Both ways
@@ -41,3 +46,108 @@
 [SEQ   0] Dropping packet
 [SEQ   0] Dropping packet
 [SEQ   0] Dropping packet
+=======
+.. loss_rate: 0
+.. seed: 1540927128
+.. link_direction: Both ways
+@@ Remote host is ::1 [36465]
+[SEQ   0] Corrupting packet: inverted byte #251
+[SEQ   0] Delayed packet by 10 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   0] Corrupting packet: inverted byte #305
+[SEQ   0] Delayed packet by 10 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   0] Corrupting packet: inverted byte #411
+[SEQ   0] Delayed packet by 10 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   0] Corrupting packet: inverted byte #17
+[SEQ   0] Delayed packet by 10 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   0] Corrupting packet: inverted byte #4
+[SEQ   0] Delayed packet by 10 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   0] Corrupting packet: inverted byte #515
+[SEQ   0] Delayed packet by 10 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   0] Delayed packet by 10 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   1] Corrupting packet: inverted byte #0
+[SEQ   1] Delayed packet by 10 ms
+[SEQ   1] Sent packet (Reverse).
+[SEQ   0] Delayed packet by 10 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   1] Corrupting packet: inverted byte #0
+[SEQ   1] Delayed packet by 10 ms
+[SEQ   1] Sent packet (Reverse).
+[SEQ   0] Delayed packet by 10 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   1] Corrupting packet: inverted byte #1
+[SEQ 254] Delayed packet by 10 ms
+[SEQ 254] Sent packet (Reverse).
+[SEQ   0] Delayed packet by 10 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   1] Corrupting packet: inverted byte #5
+[SEQ   1] Delayed packet by 10 ms
+[SEQ   1] Sent packet (Reverse).
+[SEQ   0] Corrupting packet: inverted byte #336
+[SEQ   0] Delayed packet by 10 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   0] Corrupting packet: inverted byte #415
+[SEQ   0] Delayed packet by 10 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   0] Corrupting packet: inverted byte #109
+[SEQ   0] Delayed packet by 10 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   0] Delayed packet by 10 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   1] Corrupting packet: inverted byte #0
+[SEQ   1] Delayed packet by 10 ms
+[SEQ   1] Sent packet (Reverse).
+[SEQ   0] Delayed packet by 10 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   1] Corrupting packet: inverted byte #10
+[SEQ   1] Delayed packet by 10 ms
+[SEQ   1] Sent packet (Reverse).
+[SEQ   0] Corrupting packet: inverted byte #378
+[SEQ   0] Delayed packet by 10 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   0] Delayed packet by 10 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   1] Delayed packet by 10 ms
+[SEQ   1] Sent packet (Reverse).
+[SEQ   1] Delayed packet by 10 ms
+[SEQ   2] Delayed packet by 10 ms
+[SEQ   3] Corrupting packet: inverted byte #379
+[SEQ   3] Delayed packet by 10 ms
+[SEQ   1] Sent packet (Forward).
+[SEQ   2] Sent packet (Forward).
+[SEQ   3] Sent packet (Forward).
+[SEQ   2] Corrupting packet: inverted byte #9
+[SEQ   2] Delayed packet by 10 ms
+[SEQ   3] Corrupting packet: inverted byte #4
+[SEQ   3] Delayed packet by 10 ms
+[SEQ   2] Sent packet (Reverse).
+[SEQ   3] Sent packet (Reverse).
+[SEQ   1] Delayed packet by 10 ms
+[SEQ   2] Delayed packet by 10 ms
+[SEQ   3] Corrupting packet: inverted byte #338
+[SEQ   3] Delayed packet by 10 ms
+[SEQ   1] Sent packet (Forward).
+[SEQ   2] Sent packet (Forward).
+[SEQ   3] Sent packet (Forward).
+[SEQ   3] Corrupting packet: inverted byte #9
+[SEQ   3] Delayed packet by 10 ms
+[SEQ   3] Delayed packet by 10 ms
+[SEQ   3] Sent packet (Reverse).
+[SEQ   3] Sent packet (Reverse).
+[SEQ   3] Corrupting packet: inverted byte #277
+[SEQ   3] Delayed packet by 10 ms
+[SEQ   3] Sent packet (Forward).
+[SEQ   3] Delayed packet by 10 ms
+[SEQ   3] Sent packet (Forward).
+[SEQ   4] Delayed packet by 10 ms
+[SEQ   4] Sent packet (Reverse).
+[SEQ   4] Corrupting packet: inverted byte #4
+[SEQ   4] Delayed packet by 10 ms
+[SEQ   4] Sent packet (Forward).
+>>>>>>> bffd1950163f9d3c295955dd3cf05a2a1b80d365

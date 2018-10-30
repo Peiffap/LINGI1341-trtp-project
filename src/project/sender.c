@@ -44,6 +44,7 @@ int remove_pkt(uint8_t seqnum){
 		pkt_waiting--;
 		free(current->bufpkt);
 		free(current);
+		current = NULL;
 	}
 	else{
 		current = current->next;
@@ -55,6 +56,8 @@ int remove_pkt(uint8_t seqnum){
 				pkt_waiting--;
 				free(current->bufpkt);
 				free(current);
+				current = NULL;
+
 
 			}
 
@@ -71,6 +74,8 @@ int remove_pkt(uint8_t seqnum){
 		pkt_waiting--;
 		free(current->bufpkt);
 		free(current);
+		current = NULL;
+
 	}
 	printf("[LOG] [SENDER] Packet with sequence number %d removed\n", seqnum);
 	return 0;
@@ -282,57 +287,58 @@ int send_data(const int sfd, const int fd){
 			if(err != PKT_OK){
 				perror("decoding ack");
 				pkt_del(ack);
-				return -1;
 			}
-			int seqnum = pkt_get_seqnum(ack);
+			else{
+				int seqnum = pkt_get_seqnum(ack);
 
-			printf("Window start at %d, end at %d, seqnum %d\n", firstseqnumwindow, (firstseqnumwindow+window)%MAX_SEQNUM, pkt_get_seqnum(ack)-1);
+				printf("Window start at %d, end at %d, seqnum %d\n", firstseqnumwindow, (firstseqnumwindow+window)%MAX_SEQNUM, pkt_get_seqnum(ack)-1);
 
-			if((pkt_get_type(ack) == PTYPE_ACK)&& (is_in_window(seqnum-1))){
-				lastackseqnum = seqnum-1;
-				window = pkt_get_window(ack);
-				printf("[LOG] [SENDER] ACK received for seqnum %d\n", lastackseqnum);
-				firstseqnumwindow = (seqnum %MAX_SEQNUM);
-				remove_pkt(lastackseqnum);
-
-
+				if((pkt_get_type(ack) == PTYPE_ACK)&& (is_in_window(seqnum-1))){
+					lastackseqnum = seqnum-1;
+					window = pkt_get_window(ack);
+					printf("[LOG] [SENDER] ACK received for seqnum %d\n", lastackseqnum);
+					firstseqnumwindow = (seqnum %MAX_SEQNUM);
+					remove_pkt(lastackseqnum);
 
 
-			}
-			if(pkt_get_type(ack) == PTYPE_NACK){
 
-				printf("[LOG] [SENDER] NACK received for seqnum %d\n", lastackseqnum);
 
-				struct dataqueue *current = startofqueue;
-				int search = 1;
-				while((current!=0)&&(search)){
+				}
+				if(pkt_get_type(ack) == PTYPE_NACK){
 
-					printf("sender nack loop\n");
-					if(current->seqnum == seqnum){
-						search = 0;
+					printf("[LOG] [SENDER] NACK received for seqnum %d\n", lastackseqnum);
+
+					struct dataqueue *current = startofqueue;
+					int search = 1;
+					while((current!=0)&&(search)){
+
+						printf("sender nack loop\n");
+						if(current->seqnum == seqnum){
+							search = 0;
+						}
+						else{
+							current = current->next;
+						}
 					}
-					else{
-						current = current->next;
+					int errw = write(sfd, current->bufpkt, current->len);
+					if(errw <0){
+						perror("error writing pkt in resending pkt");
+						pkt_del(ack);
+
+						return -1;
+					}
+
+					errw = clock_gettime(CLOCK_MONOTONIC,&(current->time));
+
+					if(errw!=0){
+						perror("error clock in resending data");
+						pkt_del(ack);
+
+						return -1;
 					}
 				}
-				int errw = write(sfd, current->bufpkt, current->len);
-				if(errw <0){
-					perror("error writing pkt in resending pkt");
-					pkt_del(ack);
-
-					return -1;
-				}
-
-				errw = clock_gettime(CLOCK_MONOTONIC,&(current->time));
-
-				if(errw!=0){
-					perror("error clock in resending data");
-					pkt_del(ack);
-
-					return -1;
-				}
+				pkt_del(ack);
 			}
-			pkt_del(ack);
 		}
 
 
