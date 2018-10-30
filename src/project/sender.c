@@ -97,7 +97,31 @@ int send_pkt(const int sfd){
 
 	if((firsttosend != NULL)&&(is_in_window(firsttosend->seqnum))){
 
-		int err = write(sfd, firsttosend->bufpkt, firsttosend->len);
+		
+
+		int err = clock_gettime(CLOCK_MONOTONIC,&(firsttosend->time));
+
+		if(err!=0){
+			perror("error clock in sending data");
+			return -1;
+		}
+
+		// set timestamp as current time
+		memcpy((firsttosend->bufpkt)+4,&(firsttosend->time.tv_sec), sizeof(uint32_t));
+
+
+	 	// set crc1
+		uint32_t testCrc1 = 0;
+		char dataNonTr[8];
+		memcpy(dataNonTr, firsttosend->bufpkt, sizeof(uint64_t));
+		dataNonTr[0] = dataNonTr[0] & 0b11011111;
+		testCrc1 = crc32(testCrc1, (Bytef *)(&dataNonTr), sizeof(uint64_t));
+
+	    // crc1
+		uint32_t crc1 = htonl(testCrc1);
+		memcpy((firsttosend->bufpkt)+8, &crc1,sizeof(uint32_t));
+
+		err = write(sfd, firsttosend->bufpkt, firsttosend->len);
 		pkt_to_send--;
 		printf("[LOG] [SENDER] Writing packet with seqnum %d to socket\n", firsttosend->seqnum);
 		if(err <0){
@@ -105,12 +129,7 @@ int send_pkt(const int sfd){
 			return -1;
 		}
 
-		err = clock_gettime(CLOCK_MONOTONIC,&(firsttosend->time));
 
-		if(err!=0){
-			perror("error clock in sending data");
-			return -1;
-		}
 
 		firsttosend = firsttosend->next;
 	}
@@ -178,8 +197,23 @@ int disconnect(int sfd){
 
 	printf("[LOG] [SENDER] Entering disconnection\n");
 
-	int timestamp = 0; // How do we use the timestamp ??
+	uint32_t timestamp = 0; // How do we use the timestamp ??
+	struct timespec time;
+
+	int err = clock_gettime(CLOCK_MONOTONIC,&time);
+
+	timestamp = time.tv_sec;
+	if(err!=0){
+		perror("error clock in sending data");
+		return -1;
+	}
+
+
 	pkt_t * newpkt = pkt_create_sender(window, succ(lastackseqnum), 0, timestamp, NULL);
+
+
+
+
 
 	char bufpkt[3*sizeof(uint32_t)];
 	size_t totlen = 3*sizeof(uint32_t);

@@ -125,8 +125,16 @@ static void receive_data(FILE *f, int sfd) {
 
 		pkt_t *packet = pkt_new();
 		pkt_status_code pkt_status = pkt_decode(buffer, bytes_read, packet);
+		uint32_t timestamp = pkt_get_timestamp(packet);
+		struct timespec current_time;
+		int err = clock_gettime(CLOCK_MONOTONIC,&current_time);
 
-		if (pkt_status == PKT_OK) {
+		if(err!=0){
+			perror("error clock in sending data");
+			return;
+		}
+
+		if ((pkt_status == PKT_OK)&&(current_time.tv_sec-timestamp < 10)) {
 			uint8_t seqnum = pkt_get_seqnum(packet);
 			printf("before if%d\n", seqnum);
 			if ((seqnum > last_seqnum && seqnum < last_seqnum + window_size + 1) || ((last_seqnum + window_size > 255) && ((seqnum > last_seqnum) || (seqnum < (last_seqnum + window_size + 1) % 256)))) {
