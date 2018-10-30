@@ -65,7 +65,7 @@ static void receive_data(FILE *f, int sfd) {
 	struct timespec last_time;
 	int errc= clock_gettime(CLOCK_MONOTONIC, &last_time);
 	if (errc != 0) {
-		perror("Erorr with dc timer\n");
+		perror("Error with dc timer\n");
 		return;
 	}
 
@@ -96,11 +96,15 @@ static void receive_data(FILE *f, int sfd) {
 
 		if (pkt_status == PKT_OK) {
 			uint8_t seqnum = pkt_get_seqnum(packet);
+			printf("before if%d\n", seqnum);
 			if ((seqnum > last_seqnum && seqnum < last_seqnum + window_size + 1) || ((last_seqnum + window_size > 255) && ((seqnum > last_seqnum) || (seqnum < (last_seqnum + window_size + 1) % 256)))) {
 				minq_push(pkt_queue, packet);
+				printf("%d, %d\n", ((pkt_t *) minq_peek(pkt_queue))->seqnum, succ(last_seqnum));
 				while (!minq_empty(pkt_queue) && ((pkt_t *) minq_peek(pkt_queue))->seqnum == succ(last_seqnum)) {
+					packet = (pkt_t *) minq_peek(pkt_queue);
 					if (pkt_get_length(packet) == 0) {
-						printf("[LOG] [RECEIVER] Terminating packet received with seqnum %d\n", pkt_get_seqnum(packet));
+						printf("[LOG] [RECEIVER] Terminating packet received with seqnum %d (window starts at %d and has length %d)\n", pkt_get_seqnum(packet), last_seqnum, window_size);
+						printf("%d", (seqnum > last_seqnum && seqnum < last_seqnum + window_size + 1) || ((last_seqnum + window_size > 255) && ((seqnum > last_seqnum) || (seqnum < (last_seqnum + window_size + 1) % 256))));
 						cont = false;
 					} else {
 						printf("[LOG] [RECEIVER] Data packet %d received\n", pkt_get_seqnum(packet));
@@ -108,6 +112,7 @@ static void receive_data(FILE *f, int sfd) {
 							return;
 						}
 						send_acknowledgment(sfd, packet, window_size, PTYPE_ACK);
+						printf("$%d = %d\n", last_seqnum, succ(last_seqnum));
 						last_seqnum = succ(last_seqnum);
 					}
 					minq_pop(pkt_queue);
