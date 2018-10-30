@@ -21,9 +21,19 @@ int get_port(const char *portstring, const char *caller) {
 int succ(int seqnum) {
 	return (seqnum + 1) % 256;
 }
-
+// return true if a comes after b
 int cmp(const void *a, const void *b) {
-	return ((pkt_t *) a)->seqnum > ((pkt_t *) b)->seqnum;
+	uint8_t seqa = ((pkt_t *) a)->seqnum;
+	uint8_t seqb = ((pkt_t *) b)->seqnum;
+	if (seqa >= seqb && seqa - seqb > 200) {
+		return 0;
+	} else if (seqa < seqb && seqb - seqa > 200) {
+		return 1;
+	} else if (seqa > seqb) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 int equal(const void *a, const void *b) {
@@ -84,7 +94,7 @@ static void receive_data(FILE *f, int sfd) {
 			return;
 		}
 
-		int timeout = 1000;
+		int timeout = 4;
 		if (timee.tv_sec - last_time.tv_sec > timeout) {
 			printf("[LOG] [RECEIVER] No transmission for %d s; disconnect\n", timeout);
 			return;
