@@ -32,6 +32,18 @@ uint8_t lastackseqnum = -1;
 int pkt_waiting = 0;
 int pkt_to_send = 0;
 
+int cmp(const uint8_t seqa, const uint8_t seqb) {
+	
+	if (seqa > seqb && seqa - seqb > 200) {
+		return 0;
+	} else if (seqa <= seqb && seqb - seqa > 200) {
+		return 1;
+	} else if (seqa >= seqb) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
 
 int remove_pkt(uint8_t seqnum){
 	printf("[LOG] [SENDER] Removing packet with sequence number %d\n", seqnum);
@@ -39,7 +51,7 @@ int remove_pkt(uint8_t seqnum){
 
 
 
-	if(current != NULL && current->seqnum <= seqnum){
+	if(current != NULL && cmp(seqnum, current->seqnum)){
 		startofqueue = current->next;
 		pkt_waiting--;
 		free(current->bufpkt);
@@ -50,7 +62,7 @@ int remove_pkt(uint8_t seqnum){
 		current = current->next;
 		struct dataqueue *before = startofqueue;
 		while(current!=NULL){
-			if(current->seqnum <= seqnum){
+			if (cmp(seqnum, current->seqnum)){
 
 				before->next = current->next;
 				pkt_waiting--;
@@ -68,7 +80,7 @@ int remove_pkt(uint8_t seqnum){
 
 		}
 	}
-	if(startofqueue != NULL && startofqueue->seqnum <= seqnum){
+	if(startofqueue != NULL && (cmp(seqnum, startofqueue->seqnum))){
 		current = startofqueue;
 		startofqueue = startofqueue->next;
 		pkt_waiting--;
@@ -329,6 +341,9 @@ int send_data(const int sfd, const int fd){
 
 				if((pkt_get_type(ack) == PTYPE_ACK)&& (is_in_window(seqnum-1))){
 					lastackseqnum = seqnum-1;
+					if (seqnum == 0){
+						lastackseqnum = MAX_SEQNUM -1;
+					}
 					window = pkt_get_window(ack);
 					printf("[LOG] [SENDER] ACK received for seqnum %d\n", lastackseqnum);
 					firstseqnumwindow = (seqnum %MAX_SEQNUM);
@@ -391,6 +406,31 @@ int send_data(const int sfd, const int fd){
 			if(((time.tv_sec - current->time.tv_sec)*1000000 + (time.tv_nsec - current->time.tv_nsec)/1000)>TIMEOUT){
 
 			//RESEND DATA
+
+
+				int errclock = clock_gettime(CLOCK_MONOTONIC,&(current->time));
+
+				if(errclock!=0){
+					perror("error clock in sending data");
+					return -1;
+				}
+
+				// set timestamp as current time
+				memcpy((current->bufpkt)+4,&(current->time.tv_sec), sizeof(uint32_t));
+
+
+			 	// set crc1
+				uint32_t testCrc1 = 0;
+				char dataNonTr[8];
+				memcpy(dataNonTr, current->bufpkt, sizeof(uint64_t));
+				dataNonTr[0] = dataNonTr[0] & 0b11011111;
+				testCrc1 = crc32(testCrc1, (Bytef *)(&dataNonTr), sizeof(uint64_t));
+
+			    // crc1
+				uint32_t crc1 = htonl(testCrc1);
+				memcpy((current->bufpkt)+8, &crc1,sizeof(uint32_t));
+
+
 				printf("[LOG] [SENDER] Timeout for packet %"PRIu8"\n", *(current->bufpkt+1));
 				int errw = write(sfd, current->bufpkt, current->len);
 				if(errw <0){
@@ -398,12 +438,7 @@ int send_data(const int sfd, const int fd){
 					return -1;
 				}
 
-				errw = clock_gettime(CLOCK_MONOTONIC,&(current->time));
-
-				if(errw!=0){
-					perror("error clock in resending data");
-					return -1;
-				}
+				
 
 			}
 			current = current->next;
