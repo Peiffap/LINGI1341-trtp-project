@@ -13,11 +13,13 @@
 #define MAX_PAYLOAD_LENGTH 512
 #define MAX_SEQNUM 256
 #define TIMEOUT 1000000
+#define NOACKRECEIV 10
 
 
 uint8_t lastseqnum = 0;
 uint8_t window = 1;
 uint8_t firstseqnumwindow = 0;
+struct timespec timeoflastack;
 struct dataqueue {
 	char *bufpkt;
 	uint8_t seqnum;
@@ -270,7 +272,14 @@ int send_data(const int sfd, const int fd){
 
 	int err;
 	int stop = 1;
-	while ((pkt_waiting > 0 || stop) || succ(lastackseqnum) != lastseqnum) {
+	int signal = 1;
+	int errt = clock_gettime(CLOCK_MONOTONIC,&timeoflastack);
+
+	if(errt!=0){
+		perror("error get time before sending anything(time of last ack)");
+		return -1;
+	}
+	while (((pkt_waiting > 0 || stop) || succ(lastackseqnum) != lastseqnum)&& signal) {
 		memset((void *) buf1, 0, MAX_PAYLOAD_LENGTH);
 		memset((void *) buf2, 0, sizeof(pkt_t)+MAX_PAYLOAD_LENGTH);
 		FD_ZERO(&readfds);
@@ -320,21 +329,32 @@ int send_data(const int sfd, const int fd){
 		if (FD_ISSET(sfd, &readfds)) { // Data incoming from socket
 
 
-
-		    	err = read(sfd, buf2, sizeof(pkt_t)+MAX_PAYLOAD_LENGTH);
+	    	err = read(sfd, buf2, sizeof(pkt_t)+MAX_PAYLOAD_LENGTH);
 			printf("[LOG] [SENDER] done reading ACK from socket\n");
+			
 
-		    	if (err <= 0){
+			
+	    	if (err <= 0){
 				perror("error reading from socket : ");
+				return -1;
+			}
+
+			int errti = clock_gettime(CLOCK_MONOTONIC,&timeoflastack);
+
+			if(errti!=0){
+				perror("error get time in reading ack");
 				return -1;
 			}
 			pkt_t *ack = pkt_new();
 			err = pkt_decode(buf2, err, ack);
 			if(err != PKT_OK){
+							printf("here\n");
+
 				perror("decoding ack");
 				pkt_del(ack);
 			}
 			else{
+
 				int seqnum = pkt_get_seqnum(ack);
 
 				printf("Window start at %d, end at %d, seqnum %d\n", firstseqnumwindow, (firstseqnumwindow+window)%MAX_SEQNUM, pkt_get_seqnum(ack)-1);
@@ -395,55 +415,60 @@ int send_data(const int sfd, const int fd){
 		struct timespec time;
 		int errc = clock_gettime(CLOCK_MONOTONIC,&time);
 
-		if(errc!=0){
-			perror("error get time in send data");
-			return -1;
+		if(time.tv_sec - timeoflastack.tv_sec>NOACKRECEIV){
+			printf("[LOG] [SENDER] No ack received from receiver for %d\n", NOACKRECEIV);
+			signal = 0;
 		}
-
-		struct dataqueue *current = startofqueue;
-		while (current != firsttosend) {
-
-			if(((time.tv_sec - current->time.tv_sec)*1000000 + (time.tv_nsec - current->time.tv_nsec)/1000)>TIMEOUT){
-
-			//RESEND DATA
-
-
-				int errclock = clock_gettime(CLOCK_MONOTONIC,&(current->time));
-
-				if(errclock!=0){
-					perror("error clock in sending data");
-					return -1;
-				}
-
-				// set timestamp as current time
-				memcpy((current->bufpkt)+4,&(current->time.tv_sec), sizeof(uint32_t));
-
-
-			 	// set crc1
-				uint32_t testCrc1 = 0;
-				char dataNonTr[8];
-				memcpy(dataNonTr, current->bufpkt, sizeof(uint64_t));
-				dataNonTr[0] = dataNonTr[0] & 0b11011111;
-				testCrc1 = crc32(testCrc1, (Bytef *)(&dataNonTr), sizeof(uint64_t));
-
-			    // crc1
-				uint32_t crc1 = htonl(testCrc1);
-				memcpy((current->bufpkt)+8, &crc1,sizeof(uint32_t));
-
-
-				printf("[LOG] [SENDER] Timeout for packet %"PRIu8"\n", *(current->bufpkt+1));
-				int errw = write(sfd, current->bufpkt, current->len);
-				if(errw <0){
-					perror("error writing pkt in resending pkt");
-					return -1;
-				}
-
-				
-
+		else{
+			if(errc!=0){
+				perror("error get time in send data");
+				return -1;
 			}
-			current = current->next;
-		}
 
+			struct dataqueue *current = startofqueue;
+			while (current != firsttosend) {
+
+				if(((time.tv_sec - current->time.tv_sec)*1000000 + (time.tv_nsec - current->time.tv_nsec)/1000)>TIMEOUT){
+
+				//RESEND DATA
+
+
+					int errclock = clock_gettime(CLOCK_MONOTONIC,&(current->time));
+
+					if(errclock!=0){
+						perror("error clock in sending data");
+						return -1;
+					}
+
+					// set timestamp as current time
+					memcpy((current->bufpkt)+4,&(current->time.tv_sec), sizeof(uint32_t));
+
+
+				 	// set crc1
+					uint32_t testCrc1 = 0;
+					char dataNonTr[8];
+					memcpy(dataNonTr, current->bufpkt, sizeof(uint64_t));
+					dataNonTr[0] = dataNonTr[0] & 0b11011111;
+					testCrc1 = crc32(testCrc1, (Bytef *)(&dataNonTr), sizeof(uint64_t));
+
+				    // crc1
+					uint32_t crc1 = htonl(testCrc1);
+					memcpy((current->bufpkt)+8, &crc1,sizeof(uint32_t));
+
+
+					printf("[LOG] [SENDER] Timeout for packet %"PRIu8"\n", *(current->bufpkt+1));
+					int errw = write(sfd, current->bufpkt, current->len);
+					if(errw <0){
+						perror("error writing pkt in resending pkt");
+						return -1;
+					}
+
+					
+
+				}
+				current = current->next;
+			}
+		}
 
 	}
 

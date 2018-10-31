@@ -10,8 +10,10 @@ void pkt_del(pkt_t *pkt)
  	if(pkt!=NULL){
 		if(pkt->payload !=NULL){
 			free(pkt->payload);
+			pkt->payload = NULL;
 		}
 		free(pkt);
+		pkt = NULL;
 	}
 }
 
