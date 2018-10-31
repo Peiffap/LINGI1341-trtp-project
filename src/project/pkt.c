@@ -335,6 +335,8 @@ char *pkt_create(const uint8_t type, const uint8_t window, const uint8_t seqnum,
 
 	uint32_t crc1 = htonl(testCrc1);
 	memcpy(buf+8, &crc1,sizeof(uint32_t));
+	
+	pkt_del(newpkt);
 	return buf;
 }
 

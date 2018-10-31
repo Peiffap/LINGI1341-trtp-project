@@ -53,6 +53,7 @@ void send_acknowledgment(int sfd, pkt_t *packet, uint8_t wdw, uint8_t type) {
 	} else {
 		printf("[LOG] [RECEIVER] (N)ACK sent for %d w/ seqnum %d\n", seqnum, succ(seqnum));
 	}
+	
 }
 
 int write_data(FILE *f, pkt_t *packet) {
@@ -119,13 +120,16 @@ static void receive_data(FILE *f, int sfd) {
 		if (rts2timer.tv_sec - rtstimer.tv_sec > frts) {
 			printf("[LOG] [RECEIVER] Fast retransmit ACK\n");
 			rtstimer = rts2timer;
-			if (lastack != NULL)
-				write(sfd, lastack, 12);
+			if (lastack != NULL) {
+				int val = write(sfd, lastack, 12);
+				val++;
+			}
 		}
 
 		pkt_t *packet = pkt_new();
 		pkt_status_code pkt_status = pkt_decode(buffer, bytes_read, packet);
 		uint32_t timestamp = pkt_get_timestamp(packet);
+		timestamp = timestamp;
 		struct timespec current_time;
 		int err = clock_gettime(CLOCK_MONOTONIC,&current_time);
 
@@ -134,7 +138,7 @@ static void receive_data(FILE *f, int sfd) {
 			return;
 		}
 
-		if ((pkt_status == PKT_OK)&&(current_time.tv_sec-timestamp < 10)) {
+		if (pkt_status == PKT_OK) {
 			uint8_t seqnum = pkt_get_seqnum(packet);
 			printf("before if%d\n", seqnum);
 			if ((seqnum > last_seqnum && seqnum < last_seqnum + window_size + 1) || ((last_seqnum + window_size > 255) && ((seqnum > last_seqnum) || (seqnum < (last_seqnum + window_size + 1) % 256)))) {
@@ -151,6 +155,8 @@ static void receive_data(FILE *f, int sfd) {
 						if (write_data(f, packet) != 0) {
 							return;
 						}
+						free(lastack);
+						window_size = (window_size == 31 ? window_size : window_size+1);
 						send_acknowledgment(sfd, packet, window_size, PTYPE_ACK);
 						printf("$%d = %d\n", last_seqnum, succ(last_seqnum));
 						last_seqnum = succ(last_seqnum);
@@ -160,12 +166,16 @@ static void receive_data(FILE *f, int sfd) {
 				}
 			} else {
 				printf("[LOG] [RECEIVER] Sequence number %d not in window with start at %d and size %d\n", pkt_get_seqnum(packet), last_seqnum+1, window_size);
-				if (lastack != NULL)
-					write(sfd, lastack, 12);
+				if (lastack != NULL) {
+					int eval = write(sfd, lastack, 12);
+					eval++;
+				}
 				pkt_del(packet);
 			}
 		} else {
 			if (pkt_status == E_TR && pkt_get_type(packet) == PTYPE_DATA) {
+				free(lastack);
+				window_size = (window_size % 2 == 0 ? window_size/2 : (window_size+1)/2);
 				send_acknowledgment(sfd, packet, window_size, PTYPE_NACK);
 				printf("[LOG] [RECEIVER] Packet %d truncated", pkt_get_seqnum(packet));
 			} else {
