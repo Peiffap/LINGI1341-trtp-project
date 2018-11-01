@@ -12,7 +12,7 @@
 
 #define MAX_PAYLOAD_LENGTH 512
 #define MAX_SEQNUM 256
-#define TIMEOUT 1000000
+#define TIMEOUT 2000000
 #define NOACKRECEIV 10
 
 // Seqnum of last packet read
