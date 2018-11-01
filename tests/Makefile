@@ -35,4 +35,4 @@ testsender: test_sender.o
 .PHONY: clean
 
 clean:
-	@rm -f testreceiver testsender
+	@rm -f testreceiver testsender test_sender.o test_receiver.o send_receive.o pkt.o min_queue.o

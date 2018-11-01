@@ -69,6 +69,10 @@ int cmp(const uint8_t seqa, const uint8_t seqb) {
 	}
 }
 
+int succ(int seqnum) {
+	return (seqnum + 1) % 256;
+}
+
 //Remove pkt with pkt_get_seqnum(pkt) less than seqnum (according to cmp())
 int remove_pkt(uint8_t seqnum){
 	fprintf(stderr,"[LOG] [SENDER] Removing packet with sequence number %d\n", seqnum);
@@ -179,6 +183,53 @@ int add_pkt_to_queue( char* buf, int len){
 
 }
 
+//Send a disconnection request to receiver
+void disconnection(){
+
+	fprintf(stderr,"[LOG] [SENDER] Entering disconnection\n");
+
+	uint32_t timestamp = 0;
+	struct timespec time;
+
+	int err = clock_gettime(CLOCK_MONOTONIC,&time);
+
+	timestamp = time.tv_sec;
+	if(err!=0){
+		perror("error clock in sending data");
+	}
+
+
+	pkt_t * newpkt = pkt_create_sender(window, succ(lastackseqnum), 0, timestamp, NULL);
+
+
+
+
+
+	char bufpkt[3*sizeof(uint32_t)];
+	size_t totlen = 3*sizeof(uint32_t);
+	pkt_status_code ret = pkt_encode(newpkt, bufpkt, &totlen);
+	if(ret != PKT_OK){
+		perror("error encoding pkt in disconnect");
+	}
+
+	/*int errw = write(sfd, bufpkt, totlen);
+	if(errw <0){
+		perror("error writing pkt in disconnect");
+
+		return -1;
+	}*/
+
+	pkt_status_code status = pkt_decode(bufpkt, 3*sizeof(uint32_t), newpkt);
+	CU_ASSERT_EQUAL(status, PKT_OK);
+
+	CU_ASSERT_EQUAL(pkt_get_length(newpkt), 0);
+	fprintf(stderr,"[LOG] [SENDER] Sent disconnection packet with seqnum %d\n", pkt_get_seqnum(newpkt));
+
+	pkt_del(newpkt);
+
+
+}
+
 void addandremove(){
 
 	lastseqnum = 0;
@@ -213,6 +264,9 @@ void addandremove(){
 
 
 }
+
+
+
 int main(){
   CU_pSuite senderSuite = NULL;
 	/* initialisation de la suite*/
@@ -227,7 +281,7 @@ int main(){
 	}
 
 	/* Ajout à la suite */
-	if(NULL == CU_add_test(senderSuite, "add and remove", addandremove) ) {
+	if(NULL == CU_add_test(senderSuite, "add and remove", addandremove)||NULL == CU_add_test(senderSuite, "disconnection", disconnection) ) {
 		CU_cleanup_registry();
 		return CU_get_error();
 	}
