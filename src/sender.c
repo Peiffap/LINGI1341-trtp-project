@@ -15,11 +15,19 @@
 #define TIMEOUT 1000000
 #define NOACKRECEIV 10
 
-
+// Seqnum of last packet read
 uint8_t lastseqnum = 0;
+
+//Size of window
 uint8_t window = 1;
+
+//Seqnum of the first packet in window
 uint8_t firstseqnumwindow = 0;
+
+//Time of the last ack received
 struct timespec timeoflastack;
+
+//Queue to store all the pkt already encoded in char *
 struct dataqueue {
 	char *bufpkt;
 	uint8_t seqnum;
@@ -27,12 +35,25 @@ struct dataqueue {
 	struct timespec time;
 	struct dataqueue *next;
 };
+
+//Start of the queue with pkts that the receiver has not received yet
 struct dataqueue *startofqueue = NULL;
+
+//Next pkt to send
 struct dataqueue *firsttosend = NULL;
+
+//End of the queue with pkts to send
 struct dataqueue *lasttosend = NULL;
+
+//Seqnum of the last ack received
 uint8_t lastackseqnum = -1;
+
+//Pkts not received by the receiver yet
 int pkt_waiting = 0;
+
+//Pkts not sent yet (for the 1st time)
 int pkt_to_send = 0;
+
 
 int cmp(const uint8_t seqa, const uint8_t seqb) {
 	
@@ -47,8 +68,9 @@ int cmp(const uint8_t seqa, const uint8_t seqb) {
 	}
 }
 
+//Remove pkt with pkt_get_seqnum(pkt) less than seqnum (according to cmp())
 int remove_pkt(uint8_t seqnum){
-	printf("[LOG] [SENDER] Removing packet with sequence number %d\n", seqnum);
+	fprintf(stderr,"[LOG] [SENDER] Removing packet with sequence number %d\n", seqnum);
 	struct dataqueue *current = startofqueue;
 
 
@@ -91,7 +113,11 @@ int remove_pkt(uint8_t seqnum){
 		current = NULL;
 
 	}
-	printf("[LOG] [SENDER] Packet with sequence number %d removed\n", seqnum);
+	if(startofqueue == NULL){
+		lasttosend = NULL;
+		firsttosend = NULL;
+	}
+	fprintf(stderr,"[LOG] [SENDER] Packet with sequence number %d removed\n", seqnum);
 	return 0;
 }
 
@@ -99,6 +125,7 @@ int succ(int seqnum) {
 	return (seqnum + 1) % 256;
 }
 
+// Check if seqnum is in window
 int is_in_window(int seqnum){
 	return ((((seqnum >= firstseqnumwindow)
 			&&(seqnum < firstseqnumwindow + window)
@@ -107,6 +134,7 @@ int is_in_window(int seqnum){
 			||(seqnum < (firstseqnumwindow + window)%MAX_SEQNUM)))));
 }
 
+//send firsttosend pkt in the queue if its seqnum is in window
 int send_pkt(const int sfd){
 
 	if((firsttosend != NULL)&&(is_in_window(firsttosend->seqnum))){
@@ -124,20 +152,20 @@ int send_pkt(const int sfd){
 		memcpy((firsttosend->bufpkt)+4,&(firsttosend->time.tv_sec), sizeof(uint32_t));
 
 
-	 	// set crc1
+	 	// reset crc1
 		uint32_t testCrc1 = 0;
 		char dataNonTr[8];
 		memcpy(dataNonTr, firsttosend->bufpkt, sizeof(uint64_t));
 		dataNonTr[0] = dataNonTr[0] & 0b11011111;
 		testCrc1 = crc32(testCrc1, (Bytef *)(&dataNonTr), sizeof(uint64_t));
 
-	    // crc1
 		uint32_t crc1 = htonl(testCrc1);
 		memcpy((firsttosend->bufpkt)+8, &crc1,sizeof(uint32_t));
 
+
 		err = write(sfd, firsttosend->bufpkt, firsttosend->len);
 		pkt_to_send--;
-		printf("[LOG] [SENDER] Writing packet with seqnum %d to socket\n", firsttosend->seqnum);
+		fprintf(stderr,"[LOG] [SENDER] Writing packet with seqnum %d to socket\n", firsttosend->seqnum);
 		if(err <0){
 			perror("error writing pkt");
 			return -1;
@@ -153,9 +181,9 @@ int send_pkt(const int sfd){
 	return 0;
 }
 
-
+//Add pkt to queue with pkts waiting to be sent
 int add_pkt_to_queue( char* buf, int len){
-	int timestamp = 0; // How do we use the timestamp ??
+	int timestamp = 0;
 	pkt_t * newpkt = pkt_create_sender(window, lastseqnum, len, timestamp, buf);
 	char *bufpkt = malloc(len+4*sizeof(uint32_t));
 	if(bufpkt==NULL){
@@ -199,19 +227,19 @@ int add_pkt_to_queue( char* buf, int len){
 		startofqueue = firsttosend;
 	}
 
-	printf("[LOG] [SENDER] Finished adding packet %d to queue \n", lastseqnum);
+	fprintf(stderr,"[LOG] [SENDER] Finished adding packet %d to queue \n", lastseqnum);
 	lastseqnum = (lastseqnum + 1)%MAX_SEQNUM;
 
 	return 0;
 
 }
 
-
+//Send a disconnection request to receiver
 int disconnect(int sfd){
 
-	printf("[LOG] [SENDER] Entering disconnection\n");
+	fprintf(stderr,"[LOG] [SENDER] Entering disconnection\n");
 
-	uint32_t timestamp = 0; // How do we use the timestamp ??
+	uint32_t timestamp = 0;
 	struct timespec time;
 
 	int err = clock_gettime(CLOCK_MONOTONIC,&time);
@@ -244,21 +272,15 @@ int disconnect(int sfd){
 		return -1;
 	}
 
-	printf("[LOG] [SENDER] Sent disconnection packet with seqnum %d\n", pkt_get_seqnum(newpkt));
+	fprintf(stderr,"[LOG] [SENDER] Sent disconnection packet with seqnum %d\n", pkt_get_seqnum(newpkt));
 
 	pkt_del(newpkt);
 
 
-	struct timespec time1;
-	errw = clock_gettime(CLOCK_MONOTONIC,&time1);
-
-	if(errw!=0){
-		perror("error clock in disconnect");
-
-		return -1;
-	}
 	return 0;
 }
+
+//Send data from input and manages acks/nacks
 int send_data(const int sfd, const int fd){
 
 	struct timeval tv;
@@ -279,6 +301,10 @@ int send_data(const int sfd, const int fd){
 		perror("error get time before sending anything(time of last ack)");
 		return -1;
 	}
+
+	//while( (there are pkts waiting for an ack or there is still smthing to read from input) 
+	//or (the seqnum of the next ack we are expecting is different from the seqnum of the last pkt to send))
+	//and the receiver is still active
 	while (((pkt_waiting > 0 || stop) || succ(lastackseqnum) != lastseqnum)&& signal) {
 		memset((void *) buf1, 0, MAX_PAYLOAD_LENGTH);
 		memset((void *) buf2, 0, sizeof(pkt_t)+MAX_PAYLOAD_LENGTH);
@@ -293,13 +319,15 @@ int send_data(const int sfd, const int fd){
 			return -1;
 
 		}
+
+		//We can read if there is smthing !=0 to read and if the number of pkts in the queue is less than the size of the window
 		if (FD_ISSET(fd, &readfds) && stop && pkt_waiting <= window) {
 		    	err = read(fd, buf1, MAX_PAYLOAD_LENGTH);
 
-			printf("Bytes read from input file %d \n", err);
+			fprintf(stderr,"[LOG] [SENDER] Bytes read from input file %d \n", err);
 			if (err < 0 ){
 				perror("error read fd in send data ");
-				printf("[ERROR] [SENDER] %d, %d \n", err, errno);
+				fprintf(stderr,"[ERROR] [SENDER] %d, %d \n", err, errno);
 				return -1;
 			}
 			if(err >0){
@@ -317,6 +345,7 @@ int send_data(const int sfd, const int fd){
 		}
 
 
+		//if there are pkts to send for the 1st time, send them
 		if(pkt_to_send >0){
 			int errsend = send_pkt(sfd);
 			if(errsend !=0){
@@ -326,88 +355,91 @@ int send_data(const int sfd, const int fd){
 
 		}
 
-		if (FD_ISSET(sfd, &readfds)) { // Data incoming from socket
+		 // Data incoming from socket
 
+		if (FD_ISSET(sfd, &readfds)) {
 
 	    	err = read(sfd, buf2, sizeof(pkt_t)+MAX_PAYLOAD_LENGTH);
-			printf("[LOG] [SENDER] done reading ACK from socket\n");
+			fprintf(stderr,"[LOG] [SENDER] done reading ACK from socket\n");
 			
 
 			
 	    	if (err <= 0){
 				perror("error reading from socket : ");
-				return -1;
-			}
-
-			int errti = clock_gettime(CLOCK_MONOTONIC,&timeoflastack);
-			
-
-			if(errti!=0){
-				perror("error get time in reading ack");
-				return -1;
-			}
-			pkt_t *ack = pkt_new();
-			err = pkt_decode(buf2, err, ack);
-			if(err != PKT_OK){
-							printf("here\n");
-
-				perror("decoding ack");
-				pkt_del(ack);
 			}
 			else{
+				int errti = clock_gettime(CLOCK_MONOTONIC,&timeoflastack);
+				
 
-				int seqnum = pkt_get_seqnum(ack);
-
-				printf("Window start at %d, end at %d, seqnum %d\n", firstseqnumwindow, (firstseqnumwindow+window)%MAX_SEQNUM, pkt_get_seqnum(ack)-1);
-
-				if((pkt_get_type(ack) == PTYPE_ACK)&& (is_in_window(seqnum-1))){
-					lastackseqnum = seqnum-1;
-					if (seqnum == 0){
-						lastackseqnum = MAX_SEQNUM -1;
-					}
-					window = pkt_get_window(ack);
-					printf("[LOG] [SENDER] ACK received for seqnum %d\n", lastackseqnum);
-					firstseqnumwindow = (seqnum %MAX_SEQNUM);
-					remove_pkt(lastackseqnum);
-
-
-
-
+				if(errti!=0){
+					perror("error get time in reading ack");
+					return -1;
 				}
-				if(pkt_get_type(ack) == PTYPE_NACK){
+				pkt_t *ack = pkt_new();
+				err = pkt_decode(buf2, err, ack);
+				if(err != PKT_OK){
+								fprintf(stderr,"here\n");
 
-					printf("[LOG] [SENDER] NACK received for seqnum %d\n", lastackseqnum);
-
-					struct dataqueue *current = startofqueue;
-					int search = 1;
-					while((current!=0)&&(search)){
-
-						printf("sender nack loop\n");
-						if(current->seqnum == seqnum){
-							search = 0;
-						}
-						else{
-							current = current->next;
-						}
-					}
-					int errw = write(sfd, current->bufpkt, current->len);
-					if(errw <0){
-						perror("error writing pkt in resending pkt");
-						pkt_del(ack);
-
-						return -1;
-					}
-
-					errw = clock_gettime(CLOCK_MONOTONIC,&(current->time));
-
-					if(errw!=0){
-						perror("error clock in resending data");
-						pkt_del(ack);
-
-						return -1;
-					}
+					perror("decoding ack");
+					pkt_del(ack);
 				}
-				pkt_del(ack);
+				else{
+
+					int seqnum = pkt_get_seqnum(ack);
+
+					fprintf(stderr,"[LOG] [SENDER] Window start at %d, end at %d, seqnum %d\n", firstseqnumwindow, (firstseqnumwindow+window)%MAX_SEQNUM, pkt_get_seqnum(ack)-1);
+
+					//ACK
+					if((pkt_get_type(ack) == PTYPE_ACK)&& (is_in_window(seqnum-1))){
+						lastackseqnum = seqnum-1;
+						if (seqnum == 0){
+							lastackseqnum = MAX_SEQNUM -1;
+						}
+						window = pkt_get_window(ack);
+						fprintf(stderr,"[LOG] [SENDER] ACK received for seqnum %d\n", lastackseqnum);
+						firstseqnumwindow = (seqnum %MAX_SEQNUM);
+						remove_pkt(lastackseqnum);
+
+
+
+
+					}
+					//NACK
+					if(pkt_get_type(ack) == PTYPE_NACK){
+
+						fprintf(stderr,"[LOG] [SENDER] NACK received for seqnum %d\n", lastackseqnum);
+
+						struct dataqueue *current = startofqueue;
+						int search = 1;
+						while((current!=0)&&(search)){
+
+							fprintf(stderr,"sender nack loop\n");
+							if(current->seqnum == seqnum){
+								search = 0;
+							}
+							else{
+								current = current->next;
+							}
+						}
+						int errw = write(sfd, current->bufpkt, current->len);
+						if(errw <0){
+							perror("error writing pkt in resending pkt");
+							pkt_del(ack);
+
+							return -1;
+						}
+
+						errw = clock_gettime(CLOCK_MONOTONIC,&(current->time));
+
+						if(errw!=0){
+							perror("error clock in resending data");
+							pkt_del(ack);
+
+							return -1;
+						}
+					}
+					pkt_del(ack);
+				}
 			}
 		}
 
@@ -416,8 +448,9 @@ int send_data(const int sfd, const int fd){
 		struct timespec time;
 		int errc = clock_gettime(CLOCK_MONOTONIC,&time);
 		
+		//Is the receiver still active?
 		if(time.tv_sec - timeoflastack.tv_sec>NOACKRECEIV){
-			printf("[LOG] [SENDER] No ack received from receiver for %d\n", NOACKRECEIV);
+			fprintf(stderr,"[LOG] [SENDER] No ack received from receiver for %d\n", NOACKRECEIV);
 			signal = 0;
 		}
 		else{
@@ -427,8 +460,11 @@ int send_data(const int sfd, const int fd){
 			}
 
 			struct dataqueue *current = startofqueue;
+
+			//Iterate through the queue with pkts waiting for their acks
 			while (current != firsttosend) {
 
+				// if Timeout, resend tht pkt
 				if(((time.tv_sec - current->time.tv_sec)*1000000 + (time.tv_nsec - current->time.tv_nsec)/1000)>TIMEOUT){
 
 				//RESEND DATA
@@ -452,12 +488,11 @@ int send_data(const int sfd, const int fd){
 					dataNonTr[0] = dataNonTr[0] & 0b11011111;
 					testCrc1 = crc32(testCrc1, (Bytef *)(&dataNonTr), sizeof(uint64_t));
 
-				    // crc1
 					uint32_t crc1 = htonl(testCrc1);
 					memcpy((current->bufpkt)+8, &crc1,sizeof(uint32_t));
 
 
-					printf("[LOG] [SENDER] Timeout for packet %"PRIu8"\n", *(current->bufpkt+1));
+					fprintf(stderr,"[LOG] [SENDER] Timeout for packet %"PRIu8"\n", *(current->bufpkt+1));
 					int errw = write(sfd, current->bufpkt, current->len);
 					if(errw <0){
 						perror("error writing pkt in resending pkt");
@@ -473,6 +508,7 @@ int send_data(const int sfd, const int fd){
 
 	}
 
+	//finished to send every pkt or receiver not active then disconnection
 	int errdis = disconnect(sfd);
 	if(errdis !=0){
 		perror("error disconnecting");
@@ -496,10 +532,13 @@ int main( int argc, char * argv[]){
 	char *filename = NULL;
 	int port;
 
-	if(strcmp(argv[1], "-f")==0){ // if there is a file
+	// if there is a file
+	if(strcmp(argv[1], "-f")==0){ 
 		filename = argv[2];
 		struct stat sf;
-		if(stat(filename, &sf)==-1){ // file does not exist
+
+		// file does not exist ?
+		if(stat(filename, &sf)==-1){ 
 			perror("File does not exist");
 			return -1;
 		}
@@ -540,6 +579,7 @@ int main( int argc, char * argv[]){
 			return -1;
 		}
 
+		//send data from filename
 		int err1 = send_data(sfd, fd);
 
 		if(err1 ==-1){
@@ -553,6 +593,7 @@ int main( int argc, char * argv[]){
 	}
 	else {
 
+		//send data from stdin
 		int err1 = send_data(sfd, 0);
 		if(err1 ==-1){
 			perror("error sending data");

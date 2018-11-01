@@ -1,6 +1,6 @@
-#include <../utilities.h>
+#include "../src/utilities.h"
 #include <CUnit/Basic.h>
-#include "../min_queue.h"
+#include "../src/min_queue.h"
 
 /**
  * Tests whether ports are parsed correctly in the regular case
