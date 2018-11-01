@@ -15,8 +15,9 @@ CC      = cc
 # the symbols for debugging
 LDFLAGS= -rdynamic -lz -I$$HOME/local/include -L$$HOME/local/lib -lcunit -lSDL
 # Default target
-all: clean testsender
+all: clean testsender testreceiver
 	./testsender
+	./testreceiver
 
 COMMON = ../src/send_receive.c ../src/pkt.c ../src/min_queue.c
 

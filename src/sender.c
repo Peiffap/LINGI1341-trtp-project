@@ -116,7 +116,7 @@ int remove_pkt(uint8_t seqnum){
 	if(startofqueue == NULL){
 		lasttosend = NULL;
 		firsttosend = NULL;
-	}*
+	}
 	fprintf(stderr,"[LOG] [SENDER] Packet with sequence number %d removed\n", seqnum);
 	return 0;
 }
@@ -406,6 +406,8 @@ int send_data(const int sfd, const int fd){
 					}
 					//NACK
 					if(pkt_get_type(ack) == PTYPE_NACK){
+
+						window = pkt_get_window(ack);
 
 						fprintf(stderr,"[LOG] [SENDER] NACK received for seqnum %d\n", lastackseqnum);
 
