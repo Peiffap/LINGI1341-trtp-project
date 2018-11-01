@@ -116,7 +116,7 @@ int remove_pkt(uint8_t seqnum){
 	if(startofqueue == NULL){
 		lasttosend = NULL;
 		firsttosend = NULL;
-	}
+	}*
 	fprintf(stderr,"[LOG] [SENDER] Packet with sequence number %d removed\n", seqnum);
 	return 0;
 }

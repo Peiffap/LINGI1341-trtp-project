@@ -212,13 +212,6 @@ void disconnection(){
 		perror("error encoding pkt in disconnect");
 	}
 
-	/*int errw = write(sfd, bufpkt, totlen);
-	if(errw <0){
-		perror("error writing pkt in disconnect");
-
-		return -1;
-	}*/
-
 	pkt_status_code status = pkt_decode(bufpkt, 3*sizeof(uint32_t), newpkt);
 	CU_ASSERT_EQUAL(status, PKT_OK);
 
