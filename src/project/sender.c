@@ -340,6 +340,7 @@ int send_data(const int sfd, const int fd){
 			}
 
 			int errti = clock_gettime(CLOCK_MONOTONIC,&timeoflastack);
+			
 
 			if(errti!=0){
 				perror("error get time in reading ack");
@@ -414,7 +415,7 @@ int send_data(const int sfd, const int fd){
 
 		struct timespec time;
 		int errc = clock_gettime(CLOCK_MONOTONIC,&time);
-
+		
 		if(time.tv_sec - timeoflastack.tv_sec>NOACKRECEIV){
 			printf("[LOG] [SENDER] No ack received from receiver for %d\n", NOACKRECEIV);
 			signal = 0;
