@@ -33,6 +33,10 @@ sender:	sender.o
 
 sender.o : sender.c
 	${CC} ${CFLAGS} -c sender.c ${COMMON} ${LDFLAGS}
+
+tests:
+	cd tests && make
+	make clean
 # If we run `make debug` instead, keep the debug symbols for gdb
 # and define the DEBUG macro.
 debug: CFLAGS += -g -DDEBUG -Wno-unused-parameter -fno-omit-frame-pointer
