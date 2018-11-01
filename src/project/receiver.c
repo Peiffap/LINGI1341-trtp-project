@@ -101,7 +101,7 @@ static void receive_data(FILE *f, int sfd) {
 			return;
 		}
 
-		int timeout = 400;
+		int timeout = 40;
 		if (timee.tv_sec - last_time.tv_sec > timeout) {
 			printf("[LOG] [RECEIVER] No transmission for %d s; disconnect\n", timeout);
 			return;
