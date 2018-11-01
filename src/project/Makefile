@@ -18,7 +18,7 @@ LDFLAGS= -rdynamic -lz
 # Default target
 all: clean sender receiver
 
-COMMON = tools.c send_receive.c pkt.c min_queue.c
+COMMON = send_receive.c pkt.c min_queue.c
 
 # Receiver
 receiver: receiver.o
@@ -45,4 +45,4 @@ debug: clean sender receiver
 .PHONY: clean
 
 clean:
-	@rm -f receiver sender
+	@rm -f receiver sender *.o
