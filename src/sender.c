@@ -74,25 +74,27 @@ int remove_pkt(uint8_t seqnum){
 	struct dataqueue *current = startofqueue;
 
 
-
+/*
 	if(current != NULL && cmp(seqnum, current->seqnum)){
 		startofqueue = current->next;
+		fprintf(stderr, "[LOG][SENDER] seqnum in queue (start) %d\n", current->seqnum);
 		pkt_waiting--;
 		free(current->bufpkt);
 		free(current);
 		current = NULL;
 	}
-	else{
+	else{*/
 		current = current->next;
 		struct dataqueue *before = startofqueue;
 		while(current!=NULL){
 			if (cmp(seqnum, current->seqnum)){
+				fprintf(stderr, "[LOG][SENDER] seqnum in queue %d \n", current->seqnum);
 
 				before->next = current->next;
 				pkt_waiting--;
 				free(current->bufpkt);
 				free(current);
-				current = NULL;
+				current = before->next;
 
 
 			}
@@ -103,10 +105,12 @@ int remove_pkt(uint8_t seqnum){
 			}
 
 		}
-	}
+	//}
 	if(startofqueue != NULL && (cmp(seqnum, startofqueue->seqnum))){
 		current = startofqueue;
 		startofqueue = startofqueue->next;
+		//fprintf(stderr, "[LOG][SENDER] seqnum in queue (start) %d\n", startofqueue->seqnum);
+
 		pkt_waiting--;
 		free(current->bufpkt);
 		free(current);

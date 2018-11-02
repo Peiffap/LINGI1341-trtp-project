@@ -1,61 +1,23 @@
-@@ Using random seed: 1541146537
+@@ Using random seed: 1541148182
 @@ Using parameters:
 .. port: 1341
 .. forward_port: 2456
-.. delay: 0
+.. delay: 50
 .. jitter: 0
-.. err_rate: 0
-.. cut_rate: 10
-.. loss_rate: 10
-.. seed: 1541146537
+.. err_rate: 50
+.. cut_rate: 50
+.. loss_rate: 50
+.. seed: 1541148182
 .. link_direction: Both ways
-@@ Remote host is ::1 [57258]
+@@ Remote host is ::1 [50112]
+[SEQ   0] Dropping packet
+[SEQ   0] Dropping packet
+[SEQ   0] Dropping packet
+[SEQ   0] Dropping packet
+[SEQ   0] Dropping packet
+[SEQ   0] Delayed packet by 50 ms
 [SEQ   0] Sent packet (Forward).
-[SEQ   1] Sent packet (Reverse).
-[SEQ   1] Truncating packet
-[SEQ   1] Sent packet (Forward).
-[SEQ   2] Sent packet (Forward).
-[SEQ   1] Sent packet (Reverse).
-[SEQ   3] Dropping packet
-[SEQ   4] Sent packet (Forward).
-[SEQ   5] Sent packet (Forward).
 [SEQ   1] Dropping packet
-[SEQ   6] Sent packet (Forward).
-[SEQ   7] Sent packet (Forward).
-[SEQ   8] Sent packet (Forward).
-[SEQ   9] Sent packet (Forward).
-[SEQ   2] Sent packet (Forward).
-[SEQ   3] Sent packet (Forward).
-[SEQ   4] Truncating packet
-[SEQ   4] Sent packet (Forward).
-[SEQ   5] Truncating packet
-[SEQ   5] Sent packet (Forward).
-[SEQ   1] Sent packet (Forward).
-[SEQ   6] Sent packet (Forward).
-[SEQ   1] Sent packet (Reverse).
-[SEQ   4] Sent packet (Reverse).
-[SEQ   7] Sent packet (Forward).
-[SEQ   5] Sent packet (Reverse).
-[SEQ   8] Sent packet (Forward).
-[SEQ   2] Sent packet (Reverse).
-[SEQ   1] Sent packet (Forward).
-[SEQ   3] Sent packet (Reverse).
-[SEQ   9] Truncating packet
-[SEQ   9] Sent packet (Forward).
-[SEQ   4] Sent packet (Reverse).
-[SEQ   5] Sent packet (Reverse).
-[SEQ   4] Sent packet (Forward).
-[SEQ   6] Sent packet (Reverse).
-[SEQ   7] Sent packet (Reverse).
-[SEQ   5] Sent packet (Forward).
-[SEQ   8] Sent packet (Reverse).
-[SEQ   9] Sent packet (Reverse).
-[SEQ  10] Sent packet (Reverse).
-[SEQ  10] Sent packet (Reverse).
-[SEQ  10] Sent packet (Reverse).
-[SEQ  10] Sent packet (Reverse).
-[SEQ  10] Sent packet (Reverse).
-[SEQ   9] Sent packet (Reverse).
-[SEQ   9] Sent packet (Reverse).
-[SEQ   9] Sent packet (Reverse).
-[SEQ  10] Sent packet (Forward).
+[SEQ   0] Delayed packet by 50 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   1] Dropping packet
