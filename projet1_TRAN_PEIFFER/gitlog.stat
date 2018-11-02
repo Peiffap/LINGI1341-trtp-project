@@ -1,0 +1,441 @@
+commit b411dd8728e0b255dadbfae6f638385d830a807d
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Fri Nov 2 16:14:24 2018 +0100
+
+    final submission
+
+commit d1f82ba9aa44b45ea9575a2d3f85612329cb06d1
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Fri Nov 2 15:49:03 2018 +0100
+
+    plot
+
+commit 483f788ec96014e579c36ea78c941a5fd3edc62f
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Fri Nov 2 13:40:39 2018 +0100
+
+    last version
+
+commit a56e88a04d7fcd269fb43440c79bb9a78fb4cf79
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Fri Nov 2 09:44:55 2018 +0100
+
+    erreurs remove sender
+
+commit f33a047f971784e7e1edc0a058ad1ce03599b02e
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Fri Nov 2 09:17:27 2018 +0100
+
+    push
+
+commit ec534ed397490c2301cbc85cac18f5bd21f33dcd
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Fri Nov 2 09:04:50 2018 +0100
+
+    fix receiver:
+
+commit 35b271009add3eb107c9616a197afbbc3c479092
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Fri Nov 2 08:33:29 2018 +0100
+
+    fix receiver tests
+
+commit 9e886f134c7580d992bc9601a18007b01a8824b6
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Thu Nov 1 23:21:56 2018 +0100
+
+    timeout 200ms
+
+commit 0faaa466ae12d4b750fe839656aff382c117f7c5
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Thu Nov 1 21:55:09 2018 +0100
+
+    window suite à nack
+
+commit d299e0e1883705778d8597490965dfaa9a44f128
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Thu Nov 1 19:09:16 2018 +0100
+
+    minor changes
+
+commit 613c468f92d435991d560b51ef8c18117cc4976d
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Thu Nov 1 18:41:11 2018 +0100
+
+    makefile tests
+
+commit fe666d21a22a07ca6a6bcad28cba37e9b630c565
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Thu Nov 1 18:20:23 2018 +0100
+
+    makefile and tests
+
+commit 404f00fc48fa71f31c0a2d232f4ad336e72a214b
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Thu Nov 1 17:24:29 2018 +0100
+
+    clean up code
+
+commit 84be20685724993e5812b8de82d4400d0f287115
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Thu Nov 1 16:36:13 2018 +0100
+
+    avec les tests cette fois-ci
+
+commit d191850f3faf3571edfcbb0997fe622ba801796c
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Thu Nov 1 16:33:58 2018 +0100
+
+    start cleaning up and add tests receiver
+
+commit 0b9229d445365e91bdcc71abaf9e554bfd8bba68
+Merge: 5d421d2 ed3e8cb
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Thu Nov 1 13:42:37 2018 +0100
+
+    fix merge
+
+commit 5d421d253e51b3866587f7f7a686910d3ad8a777
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Thu Nov 1 13:39:51 2018 +0100
+
+    quick fix
+
+commit ed3e8cbd1421a4e227392bb71f4dc1172ca8e506
+Author: Gilles Peiffer <gpeiffer@vader.info.ucl.ac.be>
+Date:   Wed Oct 31 21:35:37 2018 +0100
+
+    salut minh t'es sympa
+
+commit 2823ee3d878bff9b8b26416ee72ae84c8f056b5c
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Wed Oct 31 18:09:12 2018 +0100
+
+    timeout sender ( no ack from receiver)
+
+commit 78fe8fb3f4f2e4b05f595f4a59f9fe6c5429e607
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Tue Oct 30 21:55:17 2018 +0100
+
+    debug
+
+commit fd7e0414a7299f053b46a5d59aba87990beb6edb
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Tue Oct 30 20:55:02 2018 +0100
+
+    timestamp
+
+commit be6892d6a657236f32da8d1edb0a0523b6d88456
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Tue Oct 30 20:23:24 2018 +0100
+
+    :
+
+commit 582a41d35ad1b8d9b2041851c50a5e307f49a210
+Merge: 5c90ed1 bffd195
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Tue Oct 30 20:22:35 2018 +0100
+
+    merge
+
+commit 5c90ed1821702e0a313f3f4dd8ab926d1c2e4492
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Tue Oct 30 20:20:25 2018 +0100
+
+    fast retransminht
+
+commit bffd1950163f9d3c295955dd3cf05a2a1b80d365
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Tue Oct 30 20:20:21 2018 +0100
+
+    free and null in sender remove function
+
+commit d47d6e9fd3558e9d4d59236951a0d3abfdc9635f
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Tue Oct 30 19:50:53 2018 +0100
+
+    soviet anthem goodness
+
+commit 31ad6d4581a3032a2cf53eef64999f57d7f162ce
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Tue Oct 30 12:56:38 2018 +0100
+
+    Fix some issues
+
+commit 561ef54e8d2edb16ecc1c0453633db21adb9b2d9
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Mon Oct 29 23:02:49 2018 +0100
+
+    debugging
+
+commit 92839aaf3e477bc2f838954f511bc7f829b923c6
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Sun Oct 28 21:46:46 2018 +0100
+
+    Fix disconnection sort of
+
+commit 91044282987e065c4733ffa1edd47c51c3aab712
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Fri Oct 26 13:03:26 2018 +0200
+
+    dafsdfa
+
+commit a36fce368dc8c93e5fc5ad99545a8498871db015
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Fri Oct 26 10:50:54 2018 +0200
+
+    !!!!!!! ca fonctionne
+
+commit b4891e2c7b840a92903222cc0fca4235e1bac2bd
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Sun Oct 21 19:56:49 2018 +0200
+
+    fix make target
+
+commit 698c4beccb5a10d032bdbbffe853935c1c92e1f4
+Merge: 97f5181 ffb189c
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Sun Oct 21 19:55:56 2018 +0200
+
+    merge
+
+commit 97f5181f8743b04a6b99822ddd0c3aa09d05afd8
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Sun Oct 21 19:55:12 2018 +0200
+
+    merge
+
+commit ffb189cff2007f17094470f3aa3769c254f7ee56
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Sun Oct 21 19:48:19 2018 +0200
+
+    tests
+
+commit df9c864797d3c6d27f8dd8d294c552b539423bb3
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Sun Oct 21 16:40:07 2018 +0200
+
+    Revert "test.sh"
+    
+    This reverts commit 3d675026528ba3aa1c72ff7ee80fb3510106c782.
+
+commit ab279f1cc6e4cb0abb1fcab15abb01681a1c24d8
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Sun Oct 21 16:37:50 2018 +0200
+
+    tests
+
+commit 3d675026528ba3aa1c72ff7ee80fb3510106c782
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Sun Oct 21 16:25:53 2018 +0200
+
+    test.sh
+
+commit 8f4d1475ef85feec7d7e2365879724292570fee4
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Sun Oct 21 16:14:47 2018 +0200
+
+    makefile : executable receiver
+
+commit 89d4919e0bbdc8746ce04a5e98404514b1f500d4
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Sun Oct 21 16:09:34 2018 +0200
+
+    fix compilation errors
+
+commit b6534816f87126ab439b5797944fc43152437f30
+Merge: 8769a0a 4f08da5
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Sun Oct 21 16:07:37 2018 +0200
+
+    remove packet_implem.c
+
+commit 8769a0adfe204f637d798b95c68c2a3d28c2c92e
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Sun Oct 21 16:03:48 2018 +0200
+
+    merge
+
+commit 4f08da59a69ddf32ead9b13a397d943eb9c0b489
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Sun Oct 21 15:46:10 2018 +0200
+
+    merge pkt.c and packet_implem.c
+
+commit 51449fff466e76fa3aa58631e1a9441b9ed98f54
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Sun Oct 21 15:42:36 2018 +0200
+
+    Minor changes
+
+commit 083171566be4eb7618fc3dc8b144de10cfc8399f
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Sun Oct 21 14:32:18 2018 +0200
+
+    [receiver.c] Receiver main seems correct
+
+commit bd34b27b033cd174c830fa1ce7545f69ee705222
+Author: Gilles Peiffer <gilles.peiffer@outlook.com>
+Date:   Sun Oct 21 13:22:54 2018 +0200
+
+    receiver
+
+commit e4c07eedc06b78dee9356b90cdbac7bfa32d69ec
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Sun Oct 21 01:25:09 2018 +0200
+
+    minor changes
+
+commit c63e7e5ce5123a6c1b463896c9f8c37966b8aa61
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Sun Oct 21 00:59:53 2018 +0200
+
+    tests
+
+commit 138079c28c21790b6b67600909af79c7309543c4
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Sun Oct 21 00:26:29 2018 +0200
+
+    Makefile
+    
+    create sender and sender.o
+
+commit 8cedee4167e5bb451e6c5c6f6220fab5435ce0d4
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Sun Oct 21 00:09:19 2018 +0200
+
+    sender v1.3
+    
+    + disconnection
+
+commit d6fe9d205d5279d472e4711b07187750487642b8
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Sat Oct 20 23:08:12 2018 +0200
+
+    sender v1.2
+    
+    prise en compte des éléments reçus hors du window du receiver
+
+commit 77ca318add7a6d548933258d41abec6eb00839b5
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Sat Oct 20 22:35:19 2018 +0200
+
+    sender v1.1
+
+commit 71923c294bd1bc2f962e7a2afdb157657a7c9ddc
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Sat Oct 20 22:02:37 2018 +0200
+
+    sender v 1
+
+commit 35a587e5eac90025de67e44525c7307cabc330b2
+Merge: 778013e 34c6e75
+Author: Gilles Peiffer <gilles.peiffer@outlook.com>
+Date:   Thu Oct 18 20:48:41 2018 +0200
+
+    Merge branch 'master' of https://github.com/Peiffap/LINGI1341-trtp-project
+
+commit 778013ebf3448485a87c4ac2419be6b2b43e5244
+Author: Gilles Peiffer <gilles.peiffer@outlook.com>
+Date:   Thu Oct 18 20:46:08 2018 +0200
+
+    [project] Added files
+    
+    Add an initial Makefile,
+    a main function for the receiver,
+    the necessary functions for the receiver (cf. inginious)
+    and some more files designed to accumulate useful functions
+    that aren't local to the sender or the receiver.
+    
+    Signed-off-by: Gilles Peiffer <gilles.peiffer@outlook.com>
+
+commit 34c6e7554e3f8742f389186cd38c0261ffe50289
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Wed Oct 17 15:47:15 2018 +0200
+
+    sender main
+
+commit ce9c0f6d64a46ff84c94a5b2810719c2fa6903d9
+Author: Gilles Peiffer <gilles.peiffer@outlook.com>
+Date:   Wed Oct 17 14:52:06 2018 +0200
+
+    add src folder
+
+commit 49f5bdcaff72bff8777f8037e3be0515aa8c5255
+Author: Gilles Peiffer <gilles.peiffer@outlook.com>
+Date:   Wed Oct 17 14:51:23 2018 +0200
+
+    add src folder
+
+commit 3f59d4a985fb770d16ca4fce715fc7f9966f539e
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Wed Oct 17 14:14:54 2018 +0200
+
+    Final final version
+
+commit eb95833d7cb4684b47e8c3b1076b44309be9eb7e
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Wed Oct 17 14:13:11 2018 +0200
+
+    final version
+
+commit c6f2156dcdaecbdee7f40a914a900128d2b28af2
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Sun Oct 14 22:11:11 2018 +0200
+
+    qq modifs pr le segments
+
+commit 93a06289e5357e456a83e2798b350dd6e729f959
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Sun Oct 14 17:30:06 2018 +0200
+
+    fonctionne tj pas :'(
+
+commit 466cdac876f3183e54fba2c9dfa023404f91debd
+Author: Minh-Phuong Tran <minh-phuong.tran@student.uclouvain.be>
+Date:   Sun Oct 14 16:53:45 2018 +0200
+
+    segment : ne fonctionne pas encore
+
+commit a20c8b1a65465bd8b950d6709822e9463c4df8b8
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Sat Oct 13 14:48:25 2018 +0200
+
+    [send_and_receive_data] add .c files
+
+commit d54ccfd67f45dcb2519198592f90ebed0a2ce6fd
+Author: Gilles Peiffer <gilles.peiffer@outlook.com>
+Date:   Fri Oct 12 19:52:31 2018 +0200
+
+    [segment_format] add statements
+
+commit 6763c42c716b3ed7861d42cd58eecee2ab34a58f
+Merge: ba7989b 77cbc59
+Author: Gilles Peiffer <gilles.peiffer@outlook.com>
+Date:   Fri Oct 12 19:40:51 2018 +0200
+
+    Merge branch 'master' of https://github.com/Peiffap/LINGI1341-trtp-project
+
+commit ba7989b2481f79c23132eefd50d213fd7054c041
+Author: Gilles Peiffer <gilles.peiffer@outlook.com>
+Date:   Fri Oct 12 19:40:20 2018 +0200
+
+    [send_and_receive_data] add statement
+
+commit 77cbc59ff70d088759e853b0281ca0d20ac58dd8
+Author: Gilles Peiffer <gilles.peiffer@hotmail.com>
+Date:   Fri Oct 12 19:36:55 2018 +0200
+
+    Update README.md
+
+commit 953e21da8ae4f879b3f4b83813e12abd47d657f2
+Author: gp <gilles.peiffer@hotmail.com>
+Date:   Fri Oct 12 17:01:20 2018 +0200
+
+    add statement
+
+commit 3d47ded5249f675746f233a4f32fc3bcd7a5f852
+Author: Gilles Peiffer <gilles.peiffer@outlook.com>
+Date:   Tue Oct 9 08:59:18 2018 +0200
+
+    Initial commit
