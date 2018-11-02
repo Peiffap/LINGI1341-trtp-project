@@ -392,14 +392,21 @@ int send_data(const int sfd, const int fd){
 					int seqnum = pkt_get_seqnum(ack);
 
 					fprintf(stderr,"[LOG] [SENDER] Window start at %d, end at %d, seqnum %d\n", firstseqnumwindow, (firstseqnumwindow+window)%MAX_SEQNUM, pkt_get_seqnum(ack)-1);
+					
+					if (pkt_get_window(ack)>window){
+						window = pkt_get_window(ack);
+					}
 
 					//ACK
 					if((pkt_get_type(ack) == PTYPE_ACK)&& (is_in_window(seqnum-1))){
 						lastackseqnum = seqnum-1;
+						if (pkt_get_window(ack)<window){
+							window = pkt_get_window(ack);
+						}
+
 						if (seqnum == 0){
 							lastackseqnum = MAX_SEQNUM -1;
 						}
-						window = pkt_get_window(ack);
 						fprintf(stderr,"[LOG] [SENDER] ACK received for seqnum %d\n", lastackseqnum);
 						firstseqnumwindow = (seqnum %MAX_SEQNUM);
 						remove_pkt(lastackseqnum);
@@ -410,16 +417,15 @@ int send_data(const int sfd, const int fd){
 					}
 					//NACK
 					if(pkt_get_type(ack) == PTYPE_NACK){
-
-						window = pkt_get_window(ack);
-
+						if (pkt_get_window(ack)<window){
+							window = pkt_get_window(ack);
+						}
 						fprintf(stderr,"[LOG] [SENDER] NACK received for seqnum %d\n", lastackseqnum);
 
 						struct dataqueue *current = startofqueue;
 						int search = 1;
 						while((current!=0)&&(search)){
 
-							fprintf(stderr,"sender nack loop\n");
 							if(current->seqnum == seqnum){
 								search = 0;
 							}
@@ -427,21 +433,23 @@ int send_data(const int sfd, const int fd){
 								current = current->next;
 							}
 						}
-						int errw = write(sfd, current->bufpkt, current->len);
-						if(errw <0){
-							perror("error writing pkt in resending pkt");
-							pkt_del(ack);
+						if(search == 0){
+							int errw = write(sfd, current->bufpkt, current->len);
+							if(errw <0){
+								perror("error writing pkt in resending pkt");
+								pkt_del(ack);
 
-							return -1;
-						}
+								return -1;
+							}
 
-						errw = clock_gettime(CLOCK_MONOTONIC,&(current->time));
+							errw = clock_gettime(CLOCK_MONOTONIC,&(current->time));
 
-						if(errw!=0){
-							perror("error clock in resending data");
-							pkt_del(ack);
+							if(errw!=0){
+								perror("error clock in resending data");
+								pkt_del(ack);
 
-							return -1;
+								return -1;
+							}
 						}
 					}
 					pkt_del(ack);
