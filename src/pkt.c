@@ -37,13 +37,15 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
 	length = ntohs(length);
 	pkt_set_length(pkt, length);
 
-	if((length != len-4*sizeof(uint32_t))&&(length != len-3*sizeof(uint32_t))){
-		return E_LENGTH;
-	}
 
 	if((pkt->tr == 1)&&(length!=0)){
 		return E_TR;
 	}
+
+	if((length != len-4*sizeof(uint32_t))&&(length != len-3*sizeof(uint32_t))){
+		return E_LENGTH;
+	}
+
 	// timestamp
 	uint32_t timestamp;
 	memcpy(&timestamp, data+4,sizeof(uint32_t));
@@ -335,7 +337,7 @@ char *pkt_create(const uint8_t type, const uint8_t window, const uint8_t seqnum,
 
 	uint32_t crc1 = htonl(testCrc1);
 	memcpy(buf+8, &crc1,sizeof(uint32_t));
-	
+
 	pkt_del(newpkt);
 	return buf;
 }

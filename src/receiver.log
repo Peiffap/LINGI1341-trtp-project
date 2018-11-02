@@ -1,0 +1,47 @@
+[LOG] [RECEIVER] File specified: received_file
+[LOG] [RECEIVER] Opened file: received_file
+[LOG] [RECEIVER] Port initialised
+Connected to socket 4
+[LOG] [RECEIVER] Ready to receive data
+[LOG] [RECEIVER] Data packet 0 received
+[LOG] [RECEIVER] Writing payload for packet 0 to file
+[LOG] [RECEIVER] (N)ACK sent for 0 w/ seqnum 1
+[LOG] [RECEIVER] (N)ACK sent for 1 w/ seqnum 2
+[LOG] [RECEIVER] Packet 1 truncated[LOG] [RECEIVER] Fast retransmit ACK
+[LOG] [RECEIVER] (N)ACK sent for 4 w/ seqnum 5
+[LOG] [RECEIVER] Packet 4 truncated[LOG] [RECEIVER] (N)ACK sent for 5 w/ seqnum 6
+[LOG] [RECEIVER] Packet 5 truncated[LOG] [RECEIVER] Data packet 1 received
+[LOG] [RECEIVER] Writing payload for packet 1 to file
+[LOG] [RECEIVER] (N)ACK sent for 1 w/ seqnum 2
+[LOG] [RECEIVER] Data packet 2 received
+[LOG] [RECEIVER] Writing payload for packet 2 to file
+[LOG] [RECEIVER] (N)ACK sent for 2 w/ seqnum 3
+[LOG] [RECEIVER] Data packet 3 received
+[LOG] [RECEIVER] Writing payload for packet 3 to file
+[LOG] [RECEIVER] (N)ACK sent for 3 w/ seqnum 4
+[LOG] [RECEIVER] Data packet 4 received
+[LOG] [RECEIVER] Writing payload for packet 4 to file
+[LOG] [RECEIVER] (N)ACK sent for 4 w/ seqnum 5
+[LOG] [RECEIVER] Data packet 5 received
+[LOG] [RECEIVER] Writing payload for packet 5 to file
+[LOG] [RECEIVER] (N)ACK sent for 5 w/ seqnum 6
+[LOG] [RECEIVER] Data packet 6 received
+[LOG] [RECEIVER] Writing payload for packet 6 to file
+[LOG] [RECEIVER] (N)ACK sent for 6 w/ seqnum 7
+[LOG] [RECEIVER] Data packet 7 received
+[LOG] [RECEIVER] Writing payload for packet 7 to file
+[LOG] [RECEIVER] (N)ACK sent for 7 w/ seqnum 8
+[LOG] [RECEIVER] Data packet 8 received
+[LOG] [RECEIVER] Writing payload for packet 8 to file
+[LOG] [RECEIVER] (N)ACK sent for 8 w/ seqnum 9
+[LOG] [RECEIVER] Data packet 9 received
+[LOG] [RECEIVER] Writing payload for packet 9 to file
+[LOG] [RECEIVER] (N)ACK sent for 9 w/ seqnum 10
+[LOG] [RECEIVER] Sequence number 6 not in window with start at 10 and size 13
+[LOG] [RECEIVER] Sequence number 7 not in window with start at 10 and size 13
+[LOG] [RECEIVER] Sequence number 8 not in window with start at 10 and size 13
+[LOG] [RECEIVER] Sequence number 1 not in window with start at 10 and size 13
+[LOG] [RECEIVER] (N)ACK sent for 9 w/ seqnum 10
+[LOG] [RECEIVER] Packet 9 truncated[LOG] [RECEIVER] Sequence number 4 not in window with start at 10 and size 7
+[LOG] [RECEIVER] Sequence number 5 not in window with start at 10 and size 7
+[LOG] [RECEIVER] Terminating packet received with seqnum 10 (window starts at 9 and has length 7)
