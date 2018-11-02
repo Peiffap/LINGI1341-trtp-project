@@ -20,21 +20,6 @@ error reading from socket : : Connection refused
 [LOG] [SENDER] Timeout for packet 0
 [LOG] [SENDER] done reading ACK from socket
 error reading from socket : : Connection refused
-[LOG] [SENDER] Timeout for packet 0
-[LOG] [SENDER] done reading ACK from socket
-error reading from socket : : Connection refused
-[LOG] [SENDER] Timeout for packet 0
-[LOG] [SENDER] done reading ACK from socket
-error reading from socket : : Connection refused
-[LOG] [SENDER] Timeout for packet 0
-[LOG] [SENDER] done reading ACK from socket
-error reading from socket : : Connection refused
-[LOG] [SENDER] Timeout for packet 0
-[LOG] [SENDER] done reading ACK from socket
-error reading from socket : : Connection refused
-[LOG] [SENDER] Timeout for packet 0
-[LOG] [SENDER] done reading ACK from socket
-error reading from socket : : Connection refused
 [LOG] [SENDER] No ack received from receiver for 10
 [LOG] [SENDER] Entering disconnection
 [LOG] [SENDER] Sent disconnection packet with seqnum 0
