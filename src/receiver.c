@@ -197,11 +197,17 @@ static void receive_data(FILE *f, int sfd) {
 			}
 		} else {
 			// check if the packet was declared not ok because its truncation bit has the wrong value; if so, send an ACK and adjust the window_size to avoid congestion
+			uint8_t seqnum = pkt_get_seqnum(packet);
+
 			if (pkt_status == E_TR && pkt_get_type(packet) == PTYPE_DATA) {
-				free(lastack);
-				window_size = (window_size % 2 == 0 ? window_size/2 : (window_size+1)/2);
-				send_acknowledgment(sfd, packet, window_size, PTYPE_NACK);
-				fprintf(stderr, "[LOG] [RECEIVER] Packet %d truncated", pkt_get_seqnum(packet));
+				
+				if ((seqnum > last_seqnum && seqnum < last_seqnum + window_size + 1) || ((last_seqnum + window_size > 255) && ((seqnum > last_seqnum) || (seqnum < (last_seqnum + window_size + 1) % 256)))) {
+					free(lastack);
+					
+					window_size = (window_size % 2 == 0 ? window_size/2 : (window_size+1)/2);
+					send_acknowledgment(sfd, packet, window_size, PTYPE_NACK);
+					fprintf(stderr, "[LOG] [RECEIVER] Packet %d truncated", pkt_get_seqnum(packet));
+				}
 			} else {
 				fprintf(stderr, "[LOG] [RECEIVER] Packet status not OK (error code %d) for packet %d \n", pkt_status, pkt_get_seqnum(packet));
 			}

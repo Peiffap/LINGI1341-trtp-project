@@ -420,7 +420,7 @@ int send_data(const int sfd, const int fd){
 						if (pkt_get_window(ack)<window){
 							window = pkt_get_window(ack);
 						}
-						fprintf(stderr,"[LOG] [SENDER] NACK received for seqnum %d\n", lastackseqnum);
+						fprintf(stderr,"[LOG] [SENDER] NACK received for seqnum %d\n", seqnum);
 
 						struct dataqueue *current = startofqueue;
 						int search = 1;
