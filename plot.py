@@ -28,10 +28,11 @@ def perf_graph():
     fit_fnU = np.poly1d(fitU)
     fit_fnS = np.poly1d(fitS)
     
-    plt.plot(logN, logR, 'ro', logN, logU, 'bo', logN, logS, 'go', logN, fit_fnR(logN), '--r', logN, fit_fnU(logN), '--b', logN, fit_fnS(logN), '--g')
+    plot1, plot2, plot3, plot4, plot5, plot6 = plt.plot(logN, logR, 'ro', logN, logU, 'bo', logN, logS, 'go', logN, fit_fnR(logN), '--r', logN, fit_fnU(logN), '--b', logN, fit_fnS(logN), '--g')
     plt.xlabel(r"Taille du fichier [MB] en logarithmique")
     plt.ylabel(r"Temps logarithmique [s]")
     plt.title(r"Temps d'exécution en fonction de la taille du fichier d'entrée")
+    plt.legend((plot1, plot2, plot3), ('Real time', 'User time', 'System time'))
     plt.show()
     
 
