@@ -2,13 +2,45 @@
 #include <CUnit/Basic.h>
 #include "../src/min_queue.h"
 
+int get_port(const char *portstring, const char *caller) {
+	long l = -1;
+	if ((l = strtol(portstring, NULL, 10)) <= 0) {
+		fprintf(stderr, "[ERROR] [%s] Invalid port: %s\n", caller, portstring);
+		return -1;
+	} else if (l < 1024) {
+		fprintf(stderr, "[ERROR] [%s] Reserved port (value cannot be less than 1024): %s\n", caller, portstring);
+		return -1;
+	} else if (l > 65535) {
+		fprintf(stderr, "[ERROR] [%s] Invalid port (value must be less than or equal to 65535): %s\n", caller, portstring);
+		return -1;
+	}
+	fprintf(stderr, "[LOG] [%s] Port initialised\n", caller);
+	return (int) l;
+}
+
+int suc(int seqnum) {
+	return (seqnum + 1) % 256;
+}
+
+int compare(const uint8_t seqa, const uint8_t seqb) {
+	if (seqa >= seqb && seqa - seqb > 200) {
+		return 0;
+	} else if (seqa < seqb && seqb - seqa > 200) {
+		return 1;
+	} else if (seqa > seqb) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
 /**
  * Tests whether ports are parsed correctly in the regular case
  */
 void get_port_regular(void)
 {
-	const char *port = "6969";
-	int port = get_port(port, "TEST");
+	const char *portstring = "6969";
+	int port = get_port(portstring, "TEST");
 	int true_port = 6969;
 	CU_ASSERT_EQUAL(port, true_port);
 }
@@ -18,8 +50,8 @@ void get_port_regular(void)
  */
 void get_port_system(void)
 {
-	const char *port = "420";
-	int port = get_port(port, "TEST");
+	const char *portstring = "420";
+	int port = get_port(portstring, "TEST");
 	int true_port = -1;
 	CU_ASSERT_EQUAL(port, true_port);
 }
@@ -29,8 +61,8 @@ void get_port_system(void)
  */
 void get_port_big(void)
 {
-	const char *port = "31415926";
-	int port = get_port(port, "TEST");
+	const char *portstring = "31415926";
+	int port = get_port(portstring, "TEST");
 	int true_port = -1;
 	CU_ASSERT_EQUAL(port, true_port);
 }
@@ -40,8 +72,8 @@ void get_port_big(void)
  */
 void get_port_negative(void)
 {
-	const char *port = "-6969";
-	int port = get_port(port, "TEST");
+	const char *portstring = "-6969";
+	int port = get_port(portstring, "TEST");
 	int true_port = -1;
 	CU_ASSERT_EQUAL(port, true_port);
 }
@@ -51,8 +83,8 @@ void get_port_negative(void)
  */
 void get_port_zero(void)
 {
-	const char *port = "0";
-	int port = get_port(port, "TEST");
+	const char *portstring = "0";
+	int port = get_port(portstring, "TEST");
 	int true_port = -1;
 	CU_ASSERT_EQUAL(port, true_port);
 }
@@ -63,9 +95,9 @@ void get_port_zero(void)
  void succ_regular(void)
  {
  	int seqnum = 69;
- 	int succ = succ(seqnum);
- 	int true_port = 70;
- 	CU_ASSERT_EQUAL(true_port, succ);
+ 	int succ = suc(seqnum);
+ 	int true_succ = 70;
+ 	CU_ASSERT_EQUAL(true_succ, succ);
  }
 
 /**
@@ -74,9 +106,9 @@ void get_port_zero(void)
 void succ_255(void)
 {
 	int seqnum = 255;
-	int succ = succ(seqnum);
-	int true_port = 0;
-	CU_ASSERT_EQUAL(true_port, succ);
+	int succ = suc(seqnum);
+	int true_succ = 0;
+	CU_ASSERT_EQUAL(true_succ, succ);
 }
 
 /**
@@ -85,9 +117,9 @@ void succ_255(void)
 void succ_0(void)
 {
 	int seqnum = 0;
-	int succ = succ(seqnum);
-	int true_port = -1;
-	CU_ASSERT_EQUAL(true_port, succ);
+	int succ = suc(seqnum);
+	int true_succ = 1;
+	CU_ASSERT_EQUAL(true_succ, succ);
 }
 
 /**
@@ -96,9 +128,9 @@ void succ_0(void)
 void succ_negative(void)
 {
 	int seqnum = -1;
-	int succ = succ(seqnum);
-	int true_port = 0;
-	CU_ASSERT_EQUAL(true_port, succ);
+	int succ = suc(seqnum);
+	int true_succ = 0;
+	CU_ASSERT_EQUAL(true_succ, succ);
 }
 
 /**
@@ -106,11 +138,9 @@ void succ_negative(void)
  */
 void cmp_reg(void)
 {
-	pkt_t a = pkt_new();
-	pkt_set_seqnum(a, 34);
-	pkt_t b = pkt_new();
-	pkt_set_seqnum(b, 45);
-	int cmp = cmp(a, b);
+	uint8_t a = 34;
+	uint8_t b = 45;
+	int cmp = compare(a, b);
 	CU_ASSERT_EQUAL(cmp, 0);
 }
 
@@ -119,15 +149,15 @@ void cmp_reg(void)
  */
 void cmp_wrap(void)
 {
-	pkt_t a = pkt_new();
-	pkt_set_seqnum(a, 0);
-	pkt_t b = pkt_new();
-	pkt_set_seqnum(b, 255);
-	int cmp = cmp(a, b);
+	uint8_t a = 0;
+	uint8_t b = 255;
+	int cmp = compare(a, b);
 	CU_ASSERT_EQUAL(cmp, 1);
 }
 
 int main(int argc, const char *argv[]) {
+	argc = argc;
+	argv = argv;
 	CU_pSuite pSuite = NULL;
 	// Initialise Suite.
 	if (CUE_SUCCESS != CU_initialize_registry())

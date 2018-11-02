@@ -56,7 +56,7 @@ int pkt_to_send = 0;
 
 
 int cmp(const uint8_t seqa, const uint8_t seqb) {
-	
+
 	if (seqa > seqb && seqa - seqb > 200) {
 		return 0;
 	} else if (seqa <= seqb && seqb - seqa > 200) {
@@ -139,7 +139,7 @@ int send_pkt(const int sfd){
 
 	if((firsttosend != NULL)&&(is_in_window(firsttosend->seqnum))){
 
-		
+
 
 		int err = clock_gettime(CLOCK_MONOTONIC,&(firsttosend->time));
 
@@ -302,7 +302,7 @@ int send_data(const int sfd, const int fd){
 		return -1;
 	}
 
-	//while( (there are pkts waiting for an ack or there is still smthing to read from input) 
+	//while( (there are pkts waiting for an ack or there is still smthing to read from input)
 	//or (the seqnum of the next ack we are expecting is different from the seqnum of the last pkt to send))
 	//and the receiver is still active
 	while (((pkt_waiting > 0 || stop) || succ(lastackseqnum) != lastseqnum)&& signal) {
@@ -361,15 +361,15 @@ int send_data(const int sfd, const int fd){
 
 	    	err = read(sfd, buf2, sizeof(pkt_t)+MAX_PAYLOAD_LENGTH);
 			fprintf(stderr,"[LOG] [SENDER] done reading ACK from socket\n");
-			
 
-			
+
+
 	    	if (err <= 0){
 				perror("error reading from socket : ");
 			}
 			else{
 				int errti = clock_gettime(CLOCK_MONOTONIC,&timeoflastack);
-				
+
 
 				if(errti!=0){
 					perror("error get time in reading ack");
@@ -449,7 +449,7 @@ int send_data(const int sfd, const int fd){
 
 		struct timespec time;
 		int errc = clock_gettime(CLOCK_MONOTONIC,&time);
-		
+
 		//Is the receiver still active?
 		if(time.tv_sec - timeoflastack.tv_sec>NOACKRECEIV){
 			fprintf(stderr,"[LOG] [SENDER] No ack received from receiver for %d\n", NOACKRECEIV);
@@ -501,7 +501,7 @@ int send_data(const int sfd, const int fd){
 						return -1;
 					}
 
-					
+
 
 				}
 				current = current->next;
@@ -535,12 +535,12 @@ int main( int argc, char * argv[]){
 	int port;
 
 	// if there is a file
-	if(strcmp(argv[1], "-f")==0){ 
+	if(strcmp(argv[1], "-f")==0){
 		filename = argv[2];
 		struct stat sf;
 
 		// file does not exist ?
-		if(stat(filename, &sf)==-1){ 
+		if(stat(filename, &sf)==-1){
 			perror("File does not exist");
 			return -1;
 		}

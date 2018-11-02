@@ -150,6 +150,7 @@ static void receive_data(FILE *f, int sfd) {
 			}
 		}
 
+		// decode packet
 		pkt_t *packet = pkt_new();
 		pkt_status_code pkt_status = pkt_decode(buffer, bytes_read, packet);
 		uint32_t timestamp = pkt_get_timestamp(packet);
@@ -162,15 +163,16 @@ static void receive_data(FILE *f, int sfd) {
 			return;
 		}
 
+		// check if the packet is ok and if it lies in the receiver's window
 		if (pkt_status == PKT_OK) {
 			uint8_t seqnum = pkt_get_seqnum(packet);
 			if ((seqnum > last_seqnum && seqnum < last_seqnum + window_size + 1) || ((last_seqnum + window_size > 255) && ((seqnum > last_seqnum) || (seqnum < (last_seqnum + window_size + 1) % 256)))) {
 				minq_push(pkt_queue, packet);
+				// while the next packet in the queue has the next expected seqnum, keep writing it to the file and popping it from the queue
 				while (!minq_empty(pkt_queue) && ((pkt_t *) minq_peek(pkt_queue))->seqnum == succ(last_seqnum)) {
 					packet = (pkt_t *) minq_peek(pkt_queue);
 					if (pkt_get_length(packet) == 0) {
 						fprintf(stderr, "[LOG] [RECEIVER] Terminating packet received with seqnum %d (window starts at %d and has length %d)\n", pkt_get_seqnum(packet), last_seqnum, window_size);
-						fprintf(stderr, "%d", (seqnum > last_seqnum && seqnum < last_seqnum + window_size + 1) || ((last_seqnum + window_size > 255) && ((seqnum > last_seqnum) || (seqnum < (last_seqnum + window_size + 1) % 256))));
 						cont = false;
 					} else {
 						fprintf(stderr, "[LOG] [RECEIVER] Data packet %d received\n", pkt_get_seqnum(packet));
@@ -180,7 +182,6 @@ static void receive_data(FILE *f, int sfd) {
 						free(lastack);
 						window_size = (window_size == 31 ? window_size : window_size+1);
 						send_acknowledgment(sfd, packet, window_size, PTYPE_ACK);
-						fprintf(stderr, "$%d = %d\n", last_seqnum, succ(last_seqnum));
 						last_seqnum = succ(last_seqnum);
 					}
 					minq_pop(pkt_queue);
@@ -195,13 +196,14 @@ static void receive_data(FILE *f, int sfd) {
 				pkt_del(packet);
 			}
 		} else {
+			// check if the packet was declared not ok because its truncation bit has the wrong value; if so, send an ACK and adjust the window_size to avoid congestion
 			if (pkt_status == E_TR && pkt_get_type(packet) == PTYPE_DATA) {
 				free(lastack);
 				window_size = (window_size % 2 == 0 ? window_size/2 : (window_size+1)/2);
 				send_acknowledgment(sfd, packet, window_size, PTYPE_NACK);
 				fprintf(stderr, "[LOG] [RECEIVER] Packet %d truncated", pkt_get_seqnum(packet));
 			} else {
-				fprintf(stderr, "[LOG] [RECEIVER] Packet status not OK (erro code %d) for packet %d \n", pkt_status==E_CRC, pkt_get_seqnum(packet));
+				fprintf(stderr, "[LOG] [RECEIVER] Packet status not OK (error code %d) for packet %d \n", pkt_status, pkt_get_seqnum(packet));
 			}
 			pkt_del(packet);
 		}
@@ -214,6 +216,7 @@ int main(int argc, char *argv[]) {
 	int opt;
 	char fn[FILE_SIZE];  // adjust size if needed
 
+	// read arguments
 	if (argc >= 3) {
 		while ((opt = getopt(argc, argv, "f:")) != -1) {
 			switch (opt) {
@@ -290,7 +293,7 @@ int main(int argc, char *argv[]) {
 		fclose(f);
 		free(lastack);
 	} else {
-		receive_data(stdout, sfd);
+		receive_data(stderr, sfd);
 	}
 	return EXIT_SUCCESS;
 }

@@ -1,1 +1,114 @@
-./test.sh: line 10: ./link_sim: No such file or directory
+@@ Using random seed: 1541145821
+@@ Using parameters:
+.. port: 1341
+.. forward_port: 2456
+.. delay: 0
+.. jitter: 0
+.. err_rate: 50
+.. cut_rate: 0
+.. loss_rate: 0
+.. seed: 1541145821
+.. link_direction: Both ways
+@@ Remote host is ::1 [57898]
+[SEQ   0] Sent packet (Forward).
+[SEQ   1] Sent packet (Reverse).
+[SEQ   1] Sent packet (Forward).
+[SEQ   2] Corrupting packet: inverted byte #312
+[SEQ   2] Sent packet (Forward).
+[SEQ   2] Sent packet (Reverse).
+[SEQ   3] Corrupting packet: inverted byte #168
+[SEQ   3] Sent packet (Forward).
+[SEQ   4] Sent packet (Forward).
+[SEQ   5] Sent packet (Forward).
+[SEQ   6] Sent packet (Forward).
+[SEQ   7] Sent packet (Forward).
+[SEQ   8] Corrupting packet: inverted byte #29
+[SEQ   8] Sent packet (Forward).
+[SEQ   9] Corrupting packet: inverted byte #342
+[SEQ   9] Sent packet (Forward).
+[SEQ   2] Corrupting packet: inverted byte #299
+[SEQ   2] Sent packet (Forward).
+[SEQ   2] Sent packet (Reverse).
+[SEQ   3] Corrupting packet: inverted byte #386
+[SEQ   3] Sent packet (Forward).
+[SEQ   4] Sent packet (Forward).
+[SEQ   5] Sent packet (Forward).
+[SEQ   6] Corrupting packet: inverted byte #367
+[SEQ   6] Sent packet (Forward).
+[SEQ   7] Corrupting packet: inverted byte #353
+[SEQ   7] Sent packet (Forward).
+[SEQ   8] Corrupting packet: inverted byte #463
+[SEQ   8] Sent packet (Forward).
+[SEQ   9] Corrupting packet: inverted byte #115
+[SEQ   9] Sent packet (Forward).
+[SEQ   2] Sent packet (Forward).
+[SEQ   2] Corrupting packet: inverted byte #8
+[SEQ   2] Sent packet (Reverse).
+[SEQ   3] Sent packet (Reverse).
+[SEQ   3] Corrupting packet: inverted byte #213
+[SEQ   3] Sent packet (Forward).
+[SEQ   4] Sent packet (Forward).
+[SEQ   5] Sent packet (Forward).
+[SEQ   6] Sent packet (Forward).
+[SEQ   7] Sent packet (Forward).
+[SEQ   8] Sent packet (Forward).
+[SEQ   9] Corrupting packet: inverted byte #386
+[SEQ   9] Sent packet (Forward).
+[SEQ   3] Corrupting packet: inverted byte #522
+[SEQ   3] Sent packet (Forward).
+[SEQ   3] Sent packet (Reverse).
+[SEQ   4] Corrupting packet: inverted byte #358
+[SEQ   4] Sent packet (Forward).
+[SEQ   5] Corrupting packet: inverted byte #11
+[SEQ   5] Sent packet (Forward).
+[SEQ   6] Corrupting packet: inverted byte #361
+[SEQ   6] Sent packet (Forward).
+[SEQ   7] Corrupting packet: inverted byte #394
+[SEQ   7] Sent packet (Forward).
+[SEQ   8] Sent packet (Forward).
+[SEQ   9] Corrupting packet: inverted byte #332
+[SEQ   9] Sent packet (Forward).
+[SEQ   3] Corrupting packet: inverted byte #85
+[SEQ   3] Sent packet (Forward).
+[SEQ   3] Corrupting packet: inverted byte #4
+[SEQ   3] Sent packet (Reverse).
+[SEQ   4] Corrupting packet: inverted byte #155
+[SEQ   4] Sent packet (Forward).
+[SEQ   5] Sent packet (Forward).
+[SEQ   6] Sent packet (Forward).
+[SEQ   7] Corrupting packet: inverted byte #361
+[SEQ   7] Sent packet (Forward).
+[SEQ   8] Corrupting packet: inverted byte #193
+[SEQ   8] Sent packet (Forward).
+[SEQ   9] Sent packet (Forward).
+[SEQ   3] Corrupting packet: inverted byte #520
+[SEQ   3] Sent packet (Forward).
+[SEQ   3] Corrupting packet: inverted byte #10
+[SEQ   3] Sent packet (Reverse).
+[SEQ   4] Sent packet (Forward).
+[SEQ   5] Sent packet (Forward).
+[SEQ   6] Corrupting packet: inverted byte #284
+[SEQ   6] Sent packet (Forward).
+[SEQ   7] Corrupting packet: inverted byte #373
+[SEQ   7] Sent packet (Forward).
+[SEQ   8] Corrupting packet: inverted byte #307
+[SEQ   8] Sent packet (Forward).
+[SEQ   9] Corrupting packet: inverted byte #291
+[SEQ   9] Sent packet (Forward).
+[SEQ   3] Sent packet (Forward).
+[SEQ   3] Corrupting packet: inverted byte #5
+[SEQ   3] Sent packet (Reverse).
+[SEQ   4] Corrupting packet: inverted byte #4
+[SEQ   4] Sent packet (Reverse).
+[SEQ   5] Corrupting packet: inverted byte #10
+[SEQ   5] Sent packet (Reverse).
+[SEQ   6] Sent packet (Reverse).
+[SEQ   7] Corrupting packet: inverted byte #1
+[SEQ 248] Sent packet (Reverse).
+[SEQ   8] Sent packet (Reverse).
+[SEQ   9] Sent packet (Reverse).
+[SEQ  10] Sent packet (Reverse).
+[SEQ   4] Corrupting packet: inverted byte #252
+[SEQ   4] Sent packet (Forward).
+[SEQ  10] Corrupting packet: inverted byte #5
+[SEQ  10] Sent packet (Forward).
