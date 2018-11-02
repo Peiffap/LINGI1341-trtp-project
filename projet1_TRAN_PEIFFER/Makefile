@@ -16,23 +16,23 @@ CC      = cc
 LDFLAGS= -rdynamic -lz
 
 # Default target
-all: clean sender receiver
+all: clean src/sender src/receiver
 
-COMMON = send_receive.c pkt.c min_queue.c
+COMMON = src/send_receive.c src/pkt.c src/min_queue.c
 
 # Receiver
-receiver: receiver.o
-	${CC} ${CFLAGS} -o receiver receiver.o ${COMMON} ${LDFLAGS}
+src/receiver: src/receiver.o
+	${CC} ${CFLAGS} -o src/receiver src/receiver.o ${COMMON} ${LDFLAGS}
 
-receiver.o : receiver.c
-	${CC} ${CFLAGS} -c receiver.c ${COMMON} ${LDFLAGS}
+src/receiver.o : src/receiver.c
+	${CC} ${CFLAGS} -c src/receiver.c ${COMMON} ${LDFLAGS}
 
 # Sender
-sender:	sender.o
-	${CC} ${CFLAGS} -o sender sender.o ${COMMON} ${LDFLAGS}
+src/sender: src/sender.o
+	${CC} ${CFLAGS} -o src/sender src/sender.o ${COMMON} ${LDFLAGS}
 
-sender.o : sender.c
-	${CC} ${CFLAGS} -c sender.c ${COMMON} ${LDFLAGS}
+src/sender.o : src/sender.c
+	${CC} ${CFLAGS} -c src/sender.c ${COMMON} ${LDFLAGS}
 
 tests:
 	cd ../tests && export LD_LIBRARY_PATH=$$HOME/local/lib:$$LD_LIBRARY_PATH && make
@@ -45,4 +45,4 @@ debug: clean sender receiver
 .PHONY: clean
 
 clean:
-	@rm -f receiver sender receiver.o sender.o send_receive.o pkt.o min_queue.o
+	@rm -f src/receiver src/sender src/receiver.o src/sender.o src/send_receive.o src/pkt.o src/min_queue.o
