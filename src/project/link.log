@@ -1,4 +1,4 @@
-@@ Using random seed: 1541089410
+@@ Using random seed: 1541144145
 @@ Using parameters:
 .. port: 1341
 .. forward_port: 2456
@@ -7,45 +7,65 @@
 .. err_rate: 0
 .. cut_rate: 50
 .. loss_rate: 0
-.. seed: 1541089410
+.. seed: 1541144145
 .. link_direction: Both ways
-@@ Remote host is ::1 [52332]
+@@ Remote host is ::1 [59391]
 [SEQ   0] Sent packet (Forward).
 [SEQ   1] Sent packet (Reverse).
-[SEQ   1] Truncating packet
 [SEQ   1] Sent packet (Forward).
+[SEQ   2] Truncating packet
 [SEQ   2] Sent packet (Forward).
 [SEQ   3] Truncating packet
 [SEQ   3] Sent packet (Forward).
 [SEQ   4] Truncating packet
 [SEQ   4] Sent packet (Forward).
+[SEQ   5] Truncating packet
+[SEQ   5] Sent packet (Forward).
+[SEQ   6] Truncating packet
+[SEQ   6] Sent packet (Forward).
+[SEQ   7] Sent packet (Forward).
+[SEQ   8] Sent packet (Forward).
+[SEQ   9] Sent packet (Forward).
+[SEQ   2] Sent packet (Reverse).
+[SEQ   2] Sent packet (Forward).
+[SEQ   3] Truncating packet
+[SEQ   3] Sent packet (Forward).
+[SEQ   4] Sent packet (Forward).
+[SEQ   5] Truncating packet
+[SEQ   5] Sent packet (Forward).
+[SEQ   6] Truncating packet
+[SEQ   6] Sent packet (Forward).
+[SEQ   7] Sent packet (Forward).
+[SEQ   8] Truncating packet
+[SEQ   8] Sent packet (Forward).
+[SEQ   9] Truncating packet
+[SEQ   9] Sent packet (Forward).
+[SEQ   3] Sent packet (Reverse).
+[SEQ   3] Sent packet (Forward).
+[SEQ   4] Truncating packet
+[SEQ   4] Sent packet (Forward).
+[SEQ   5] Truncating packet
+[SEQ   5] Sent packet (Forward).
+[SEQ   6] Sent packet (Forward).
+[SEQ   7] Sent packet (Forward).
+[SEQ   8] Truncating packet
+[SEQ   8] Sent packet (Forward).
+[SEQ   9] Sent packet (Forward).
+[SEQ   3] Sent packet (Reverse).
+[SEQ   4] Sent packet (Reverse).
+[SEQ   5] Sent packet (Reverse).
 [SEQ   5] Sent packet (Forward).
 [SEQ   6] Sent packet (Forward).
 [SEQ   7] Truncating packet
 [SEQ   7] Sent packet (Forward).
 [SEQ   8] Sent packet (Forward).
-[SEQ   9] Sent packet (Forward).
-[SEQ   1] Sent packet (Forward).
-[SEQ   2] Sent packet (Reverse).
-[SEQ   3] Sent packet (Reverse).
-[SEQ   2] Sent packet (Forward).
-[SEQ   3] Sent packet (Forward).
-[SEQ   4] Sent packet (Forward).
-[SEQ   5] Sent packet (Forward).
-[SEQ   6] Truncating packet
-[SEQ   6] Sent packet (Forward).
-[SEQ   3] Sent packet (Reverse).
-[SEQ   7] Sent packet (Forward).
-[SEQ   4] Sent packet (Reverse).
-[SEQ   5] Sent packet (Reverse).
-[SEQ   6] Sent packet (Reverse).
-[SEQ   7] Sent packet (Reverse).
-[SEQ   7] Sent packet (Reverse).
-[SEQ   8] Truncating packet
-[SEQ   8] Sent packet (Forward).
-[SEQ   8] Sent packet (Reverse).
 [SEQ   9] Truncating packet
 [SEQ   9] Sent packet (Forward).
+[SEQ   6] Sent packet (Reverse).
+[SEQ   7] Sent packet (Reverse).
+[SEQ   8] Sent packet (Reverse).
 [SEQ   9] Sent packet (Reverse).
+[SEQ  10] Sent packet (Reverse).
+[SEQ  10] Sent packet (Reverse).
 [SEQ  10] Sent packet (Reverse).
 [SEQ  10] Sent packet (Forward).
