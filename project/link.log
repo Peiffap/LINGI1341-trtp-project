@@ -1,0 +1,82 @@
+@@ Using random seed: 1541084105
+@@ Using parameters:
+.. port: 1341
+.. forward_port: 2456
+.. delay: 1
+.. jitter: 0
+.. err_rate: 0
+.. cut_rate: 0
+.. loss_rate: 10
+.. seed: 1541084105
+.. link_direction: Both ways
+@@ Remote host is ::1 [37620]
+[SEQ   0] Delayed packet by 1 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   1] Dropping packet
+[SEQ   0] Delayed packet by 1 ms
+[SEQ   0] Sent packet (Forward).
+[SEQ   1] Delayed packet by 1 ms
+[SEQ   1] Sent packet (Reverse).
+[SEQ   1] Delayed packet by 1 ms
+[SEQ   2] Dropping packet
+[SEQ   3] Delayed packet by 1 ms
+[SEQ   4] Delayed packet by 1 ms
+[SEQ   5] Delayed packet by 1 ms
+[SEQ   6] Delayed packet by 1 ms
+[SEQ   7] Delayed packet by 1 ms
+[SEQ   8] Delayed packet by 1 ms
+[SEQ   9] Delayed packet by 1 ms
+[SEQ   1] Sent packet (Forward).
+[SEQ   3] Sent packet (Forward).
+[SEQ   4] Sent packet (Forward).
+[SEQ   5] Sent packet (Forward).
+[SEQ   6] Sent packet (Forward).
+[SEQ   2] Delayed packet by 1 ms
+[SEQ   7] Sent packet (Forward).
+[SEQ   8] Sent packet (Forward).
+[SEQ   9] Sent packet (Forward).
+[SEQ   2] Sent packet (Reverse).
+[SEQ   2] Delayed packet by 1 ms
+[SEQ   3] Delayed packet by 1 ms
+[SEQ   4] Delayed packet by 1 ms
+[SEQ   5] Delayed packet by 1 ms
+[SEQ   6] Delayed packet by 1 ms
+[SEQ   7] Delayed packet by 1 ms
+[SEQ   8] Delayed packet by 1 ms
+[SEQ   9] Dropping packet
+[SEQ   2] Sent packet (Forward).
+[SEQ   3] Sent packet (Forward).
+[SEQ   4] Sent packet (Forward).
+[SEQ   5] Sent packet (Forward).
+[SEQ   6] Sent packet (Forward).
+[SEQ   7] Sent packet (Forward).
+[SEQ   8] Sent packet (Forward).
+[SEQ   2] Delayed packet by 1 ms
+[SEQ   3] Delayed packet by 1 ms
+[SEQ   4] Dropping packet
+[SEQ   5] Delayed packet by 1 ms
+[SEQ   6] Delayed packet by 1 ms
+[SEQ   7] Delayed packet by 1 ms
+[SEQ   8] Delayed packet by 1 ms
+[SEQ   9] Dropping packet
+[SEQ  10] Delayed packet by 1 ms
+[SEQ  10] Delayed packet by 1 ms
+[SEQ  10] Delayed packet by 1 ms
+[SEQ  10] Dropping packet
+[SEQ  10] Delayed packet by 1 ms
+[SEQ  10] Delayed packet by 1 ms
+[SEQ  10] Delayed packet by 1 ms
+[SEQ   2] Sent packet (Reverse).
+[SEQ   3] Sent packet (Reverse).
+[SEQ   5] Sent packet (Reverse).
+[SEQ   6] Sent packet (Reverse).
+[SEQ   7] Sent packet (Reverse).
+[SEQ   8] Sent packet (Reverse).
+[SEQ  10] Sent packet (Reverse).
+[SEQ  10] Sent packet (Reverse).
+[SEQ  10] Sent packet (Reverse).
+[SEQ  10] Sent packet (Reverse).
+[SEQ  10] Sent packet (Reverse).
+[SEQ  10] Sent packet (Reverse).
+[SEQ  10] Delayed packet by 1 ms
+[SEQ  10] Sent packet (Forward).

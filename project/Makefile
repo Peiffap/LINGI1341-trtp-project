@@ -16,25 +16,33 @@ CC      = cc
 LDFLAGS= -rdynamic -lz
 
 # Default target
-all: clean testreceiver testsender
-	./testreceiver
-	./testsender
+all: clean sender receiver
 
-COMMON = send_receive.c pkt.c min_queue.c
+COMMON = tools.c send_receive.c pkt.c min_queue.c
 
-testreceiver.o: test_receiver.c
-	${CC} ${CFLAGS} -c test_receiver.c ${COMMON} ${LDFLAGS}
+# Receiver
+receiver: receiver.o
+	${CC} ${CFLAGS} -o receiver receiver.o ${COMMON} ${LDFLAGS}
 
-testreceiver: testreceiver.o
-	${CC} ${CFLAGS} -o testreceiver testreceiver.o ${COMMON} ${LDFLAGS}
+receiver.o : receiver.c
+	${CC} ${CFLAGS} -c receiver.c ${COMMON} ${LDFLAGS}
 
-testsender.o: test_sender.c
-	${CC} ${CFLAGS} -c test_sender.c ${COMMON} ${LDFLAGS}
+# Sender
+sender:	sender.o
+	${CC} ${CFLAGS} -o sender sender.o ${COMMON} ${LDFLAGS}
 
-testreceiver: testsender.o
-	${CC} ${CFLAGS} -o testsender testsender.o ${COMMON} ${LDFLAGS}
+sender.o : sender.c
+	${CC} ${CFLAGS} -c sender.c ${COMMON} ${LDFLAGS}
+
+tests:
+	cd tests && make
+	make clean
+# If we run `make debug` instead, keep the debug symbols for gdb
+# and define the DEBUG macro.
+debug: CFLAGS += -g -DDEBUG -Wno-unused-parameter -fno-omit-frame-pointer
+debug: clean sender receiver
 
 .PHONY: clean
 
 clean:
-	@rm -f testreceiver testsender
+	@rm -f receiver sender

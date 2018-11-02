@@ -13,36 +13,27 @@ CC      = cc
 
 # We have no libraries to link against except libc, but we want to keep
 # the symbols for debugging
-LDFLAGS= -rdynamic -lz
-
+LDFLAGS= -rdynamic -lz -I$$HOME/local/include -L$$HOME/local/lib -lcunit -lSDL
 # Default target
-all: clean sender receiver
+all: clean testsender testreceiver
+	./testsender
+	./testreceiver
 
-COMMON = send_receive.c pkt.c min_queue.c
+COMMON = ../src/send_receive.c ../src/pkt.c ../src/min_queue.c
 
-# Receiver
-receiver: receiver.o
-	${CC} ${CFLAGS} -o receiver receiver.o ${COMMON} ${LDFLAGS}
+test_receiver.o: test_receiver.c
+	${CC} ${CFLAGS} -c test_receiver.c ${COMMON} ${LDFLAGS}
 
-receiver.o : receiver.c
-	${CC} ${CFLAGS} -c receiver.c ${COMMON} ${LDFLAGS}
+testreceiver: test_receiver.o
+	${CC} ${CFLAGS} -o testreceiver test_receiver.o ${COMMON} ${LDFLAGS}
 
-# Sender
-sender:	sender.o
-	${CC} ${CFLAGS} -o sender sender.o ${COMMON} ${LDFLAGS}
+test_sender.o: test_sender.c
+	${CC} ${CFLAGS} -c test_sender.c ${COMMON} ${LDFLAGS}
 
-sender.o : sender.c
-	${CC} ${CFLAGS} -c sender.c ${COMMON} ${LDFLAGS}
-
-tests:
-	cd tests && make
-	make clean
-# If we run `make debug` instead, keep the debug symbols for gdb
-# and define the DEBUG macro.
-debug: CFLAGS += -g -DDEBUG -Wno-unused-parameter -fno-omit-frame-pointer
-debug: clean sender receiver
+testsender: test_sender.o
+	${CC} ${CFLAGS} -o testsender test_sender.o ${COMMON} ${LDFLAGS}
 
 .PHONY: clean
 
 clean:
-	@rm -f receiver sender *.o
+	@rm -f testreceiver testsender test_sender.o test_receiver.o send_receive.o pkt.o min_queue.o
